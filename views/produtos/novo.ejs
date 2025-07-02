@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Novo Produto — Confeitaria</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Cadastrar Novo Produto</h1>
+
+    <form action="/produtos/novo" method="POST" enctype="multipart/form-data" class="formulario">
+  <input type="text" name="nome" placeholder="Nome do produto" required />
+  <textarea name="descricao" placeholder="Descrição" rows="4"></textarea>
+  <input type="number" step="0.01" name="preco" placeholder="Preço (ex: 9.90)" required />
+
+  <select name="categoria_id" required>
+    <option value="">Selecione a categoria</option>
+    <% categorias.forEach((cat) => { %>
+      <option value="<%= cat.id %>"><%= cat.nome %></option>
+    <% }) %>
+  </select>
+
+  <input type="file" name="imagem" accept="image/*" />
+
+  <button type="submit" class="btn">Salvar</button>
+</form>
+
+    <p class="msg-link">
+      <a href="/produtos">Voltar à lista</a>
+    </p>
+  </div>
+</body>
+</html>

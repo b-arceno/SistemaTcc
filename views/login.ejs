@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - TiaLuDoces</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <%- include('partials/navbar') %>
+
+  <div class="top-bar">TiaLuDoces</div>
+
+  <div class="cadastro-wrapper">
+    <div class="cadastro-img">
+      <img src="/imagens/doces.png" alt="Imagem ilustrativa" />
+    </div>
+
+    <div class="cadastro-form-card wide">
+      <div class="tabs">
+        <span class="tab active">Login</span>
+        <a href="/registro" class="tab">Registrar</a>
+      </div>
+
+      <% if (erro) { %>
+        <p style="color: red; font-weight: bold;"><%= erro %></p>
+      <% } %>
+
+      <form action="/login" method="POST" class="formulario">
+        <div class="input-icon">
+          <i class="fa fa-envelope"></i>
+          <input type="email" name="email" placeholder="E-mail" required />
+        </div>
+        <div class="input-icon">
+          <i class="fa fa-lock"></i>
+          <input type="password" name="senha" placeholder="Senha" required />
+        </div>
+
+        <a href="#" class="esqueci-senha">Esqueceu a senha?</a>
+        <button type="submit" class="btn">Entrar</button>
+      </form>
+
+      <a href="/registro" class="msg-link">Não possui conta? Cadastre-se</a>
+    </div>
+  </div>
+</body>
+</html>

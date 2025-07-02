@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= categoriaNome %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <%- include('../partials/navbar') %>
+
+  <h1 class="titulo-categoria"><%= categoriaNome.toUpperCase() %></h1>
+
+  <div class="produtos-container">
+    <% produtos.forEach(p => { %>
+      <a href="/loja/produto/<%= p.id %>" class="produto-card">
+        <img src="/imagens/<%= p.imagem %>" alt="<%= p.nome %>" />
+        <p><%= p.nome %></p>
+        <strong>R$ <%= p.preco.toFixed(2) %></strong>
+      </a>
+    <% }) %>
+  </div>
+</body>
+</html>

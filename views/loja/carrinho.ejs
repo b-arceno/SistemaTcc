@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Carrinho</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <%- include('../partials/navbar') %>
+
+  <h1 class="titulo-categoria">Seu Carrinho</h1>
+
+  <% if (!session.carrinho || session.carrinho.length === 0) { %>
+    <p style="text-align: center;">Seu carrinho está vazio.</p>
+  <% } else { %>
+    <div class="produtos-container">
+      <% session.carrinho.forEach(p => { %>
+        <div class="produto-card">
+          <img src="/imagens/<%= p.imagem %>" alt="<%= p.nome %>" />
+          <p><%= p.nome %></p>
+          <strong>R$ <%= (p.preco * p.quantidade).toFixed(2) %></strong>
+          <p>Qtd: <%= p.quantidade %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+</body>
+</html>

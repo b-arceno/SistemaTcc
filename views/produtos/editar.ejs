@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Produto — Confeitaria</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Editar Produto</h1>
+
+    <form action="/produtos/editar/<%= produto.id %>" method="POST" class="formulario">
+      <input type="text" name="nome" value="<%= produto.nome %>" required />
+      <textarea name="descricao" rows="4"><%= produto.descricao %></textarea>
+      <input type="number" step="0.01" name="preco" value="<%= produto.preco %>" required />
+    <select name="categoria_id" required>
+    <% categorias.forEach((cat) => { %>
+        <option value="<%= cat.id %>" <%= cat.id === produto.categoria_id ? 'selected' : '' %>>
+        <%= cat.nome %>
+        </option>
+    <% }) %>
+    </select>
+
+      <button type="submit" class="btn">Salvar Alterações</button>
+      <% if (produto.imagem) { %>
+  <div class="preview-imagem">
+    <p>Imagem atual:</p>
+    <img src="/imagens/<%= produto.imagem %>" width="150" />
+  </div>
+<% } else { %>
+  <p>Este produto não possui imagem.</p>
+<% } %>
+
+    </form>
+
+    <p class="msg-link">
+      <a href="/produtos">Voltar à lista</a>
+    </p>
+  </div>
+</body>
+</html>

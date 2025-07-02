@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Produtos — Confeitaria</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Produtos</h1>
+
+    <a href="/produtos/novo" class="btn">Novo Produto</a>
+    <form action="/produtos" method="GET" class="busca-form">
+      <input type="text" name="busca" value="<%= termoBusca %>" placeholder="Buscar produto..." />
+       <button type="submit">🔍</button>
+      </form>
+
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Imagem</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Preço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% produtos.forEach((produto) => { %>
+          <tr>
+            <td>
+              <% if (produto.imagem) { %>
+                <img src="/imagens/<%= produto.imagem %>" width="80" />
+              <% } else { %>
+                Sem imagem
+              <% } %>
+            </td>
+            <td><%= produto.nome %></td>
+            <td><%= produto.descricao %></td>
+            <td>R$ <%= produto.preco.toFixed(2) %></td>
+            <td>
+              <a href="/produtos/editar/<%= produto.id %>" class="btn btn-edit">Editar</a>
+              <a href="/produtos/excluir/<%= produto.id %>" class="btn btn-delete" onclick="return confirm('Deseja excluir este produto?')">Excluir</a>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

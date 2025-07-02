@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Loja — Categorias</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <%- include('../partials/navbar') %>
+
+  <h1 class="titulo-categoria">Escolha uma categoria</h1>
+
+  <div class="categorias-container">
+    <% categorias.forEach(c => { %>
+      <a href="/loja/categoria/<%= c.id %>" class="categoria-card">
+        <div class="card-imagem"></div>
+        <p><%= c.nome %></p>
+      </a>
+    <% }) %>
+  </div>
+</body>
+</html>

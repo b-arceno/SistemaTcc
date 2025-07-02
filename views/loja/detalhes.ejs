@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= produto.nome %> | Confeitaria</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <%- include('../partials/navbar') %>
+
+  <div class="produto-detalhes">
+    <div class="imagem-grande">
+      <img src="/imagens/<%= produto.imagem %>" alt="<%= produto.nome %>" />
+    </div>
+
+    <div class="info">
+      <h2><%= produto.nome %></h2>
+      <p class="preco">R$ <%= produto.preco.toFixed(2) %></p>
+      <p><%= produto.descricao %></p>
+
+      <form action="/loja/carrinho/adicionar" method="POST">
+        <input type="hidden" name="produtoId" value="<%= produto.id %>" />
+        <input type="hidden" name="nome" value="<%= produto.nome %>" />
+        <input type="hidden" name="preco" value="<%= produto.preco %>" />
+
+        <label>Quantidade:</label>
+        <div class="quantidade">
+          <button type="button" onclick="alterar(-1)">-</button>
+          <input type="number" id="quantidade" name="quantidade" value="1" min="1" />
+          <button type="button" onclick="alterar(1)">+</button>
+        </div>
+
+        <button type="submit" class="adicionar">Adicionar ao carrinho 🛒</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function alterar(valor) {
+      const input = document.getElementById('quantidade');
+      let atual = parseInt(input.value);
+      if (atual + valor >= 1) {
+        input.value = atual + valor;
+      }
+    }
+  </script>
+</body>
+</html>

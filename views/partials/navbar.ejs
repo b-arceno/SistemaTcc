@@ -1,0 +1,23 @@
+<div class="navbar-loja">
+  <div class="navbar-left">
+    <a href="/loja" class="logo">TiaLuDoces</a>
+    <a href="/loja" class="nav-link">Produtos</a>
+  </div>
+
+  <div class="navbar-right">
+    <% if (session.usuario) { %>
+      <span class="nav-user">Olá, <%= session.usuario.nome %></span>
+      <a href="/logout" title="Sair" class="nav-icon">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </a>
+    <% } else { %>
+      <a href="/login" title="Login" class="nav-icon">
+        <i class="fa-solid fa-user"></i>
+      </a>
+    <% } %>
+
+    <a href="/loja/carrinho" title="Carrinho" class="nav-icon">
+      <i class="fa-solid fa-bag-shopping"></i>
+    </a>
+  </div>
+</div>
