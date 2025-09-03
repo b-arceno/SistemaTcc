@@ -1,0 +1,40 @@
+<!-- views/senha.ejs -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recuperar/Redefinir Senha</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Recuperação de Senha</h2>
+
+    <% if (mensagem) { %>
+      <p style="margin:8px 0; color:#0f766e;"><%= mensagem %></p>
+    <% } %>
+
+    <% if (!token) { %>
+      <!-- Etapa 1: pedir e-mail -->
+      <form action="/esqueceu-senha" method="POST" style="display:flex; flex-direction:column; gap:8px;">
+        <label for="email">Digite seu e-mail cadastrado:</label>
+        <input type="email" id="email" name="email" required />
+        <button type="submit">Enviar link de recuperação</button>
+      </form>
+    <% } else { %>
+      <!-- Etapa 2: redefinir -->
+      <form action="/reset/<%= token %>" method="POST" style="display:flex; flex-direction:column; gap:8px;">
+        <label for="senha">Nova senha:</label>
+        <input type="password" id="senha" name="senha" required minlength="6" />
+        <label for="confirma">Confirme a nova senha:</label>
+        <input type="password" id="confirma" name="confirma" required minlength="6" />
+        <button type="submit">Salvar nova senha</button>
+      </form>
+    <% } %>
+
+    <p style="margin-top:12px;">
+      <a href="/login">Voltar ao login</a>
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<%- include('../partials/header') %>
+
+<h2>Meus Pedidos</h2>
+
+<% if (!pedidos || pedidos.length === 0) { %>
+  <p>Você ainda não fez nenhum pedido.</p>
+<% } else { %>
+  <table border="1" cellpadding="8" cellspacing="0">
+    <tr>
+      <th>ID</th>
+      <th>Data</th>
+      <th>Status Pedido</th>
+      <th>Status Pagamento</th>
+      <th>Forma de Pagamento</th>
+    </tr>
+    <% pedidos.forEach(p => { %>
+      <tr>
+        <td><%= p.id %></td>
+        <td><%= new Date(p.data_pedido).toLocaleString('pt-BR') %></td>
+        <td><%= p.status_pedido %></td>
+        <td><%= p.status_pagamento %></td>
+        <td><%= p.forma_pagamento %></td>
+      </tr>
+    <% }) %>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

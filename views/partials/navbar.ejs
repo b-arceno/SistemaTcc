@@ -2,6 +2,14 @@
   <div class="navbar-left">
     <a href="/loja" class="logo">TiaLuDoces</a>
     <a href="/loja" class="nav-link">Produtos</a>
+
+    <% if (session.usuario) { %>
+      <a href="/loja/pedidos" class="nav-link">Meus Pedidos</a>
+    <% } %>
+
+    <% if (session.usuario && session.usuario.tipo_usuario_id === 1) { %>
+      <a href="/admin" class="nav-link">Admin</a>
+    <% } %>
   </div>
 
   <div class="navbar-right">

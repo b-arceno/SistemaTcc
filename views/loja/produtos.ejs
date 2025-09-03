@@ -7,7 +7,7 @@
 </head>
 <body>
 
-  <%- include('../partials/navbar') %>
+<%- include('../partials/header') %>
 
   <h1 class="titulo-categoria"><%= categoriaNome.toUpperCase() %></h1>
 
@@ -20,5 +20,7 @@
       </a>
     <% }) %>
   </div>
+  <%- include('../partials/footer') %>
+
 </body>
 </html>

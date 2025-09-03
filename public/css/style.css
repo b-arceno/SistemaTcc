@@ -7,15 +7,6 @@ body {
   color: #333;
 }
 
-/*.top-bar {
-  background-color: #d9155c;
-  color: white;
-  padding: 14px;
-  text-align: center;
-  font-size: 1.4em;
-  font-weight: bold;
-}*/
-
 .cadastro-wrapper {
   display: flex;
   justify-content: center;
@@ -164,7 +155,7 @@ body {
 .produto-card {
   width: 200px;
   height: auto;
-  background-color: #f6a5c0;
+  background-color: #dd6b97;
   border-radius: 30px;
   text-align: center;
   text-decoration: none;
@@ -178,7 +169,7 @@ body {
 .categoria-card:hover,
 .produto-card:hover {
   transform: scale(1.05);
-  background-color: #af0a41;
+  background-color: #fddde9
 } 
 
 .card-imagem {

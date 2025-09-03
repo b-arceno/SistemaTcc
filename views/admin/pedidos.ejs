@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedidos - Admin</title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .status { padding: 5px 10px; border-radius: 5px; color: #fff; display: inline-block; }
+    .pendente { background-color: #f59e0b; }
+    .aprovado { background-color: #10b981; }
+    .cancelado { background-color: #ef4444; }
+  </style>
+</head>
+<body>
+  <h1>Pedidos</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Data</th>
+        <th>Total</th>
+        <th>Status Pedido</th>
+        <th>Status Pagamento</th>
+        <th>Forma de Pagamento</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (pedidos.length === 0) { %>
+        <tr>
+          <td colspan="7">Nenhum pedido encontrado.</td>
+        </tr>
+      <% } %>
+
+      <% pedidos.forEach(pedido => { %>
+        <tr>
+          <td><%= pedido.id %></td>
+          <td><%= pedido.cliente %></td>
+          <td><%= new Date(pedido.data).toLocaleString('pt-BR') %></td>
+          <td>R$ <%= pedido.total.toFixed(2) %></td>
+          <td>
+            <span class="status <%= pedido.status_pedido.toLowerCase() %>">
+              <%= pedido.status_pedido %>
+            </span>
+          </td>
+          <td>
+            <span class="status <%= pedido.status_pagamento.toLowerCase() %>">
+              <%= pedido.status_pagamento %>
+            </span>
+          </td>
+          <td><%= pedido.forma_pagamento %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

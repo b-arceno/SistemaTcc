@@ -1,55 +1,63 @@
 const db = require('../config/database');
 
-const Produto = {};
-
-// Listar todos os produtos
-Produto.listarTodos = (callback) => {
-  db.query('SELECT * FROM produtos', callback);
+// Lista todos os produtos
+exports.listarTodos = (callback) => {
+  const sql = `
+    SELECT p.*, c.nome AS categoria_nome
+    FROM produtos p
+    JOIN categoria_produto c ON p.categoria_id = c.id
+    ORDER BY p.id DESC
+  `;
+  db.query(sql, callback);
 };
 
-// Buscar produto por ID
-Produto.buscarPorId = (id, callback) => {
-  db.query('SELECT * FROM produtos WHERE id = ?', [id], callback);
-};
-
-// Inserir novo produto no banco
-Produto.inserir = (produto, callback) => {
+// Inserir novo produto
+exports.inserir = (produto, callback) => {
   const sql = `
     INSERT INTO produtos (nome, descricao, preco, categoria_id, imagem)
     VALUES (?, ?, ?, ?, ?)
   `;
-  const values = [
+  const valores = [
     produto.nome,
     produto.descricao,
     produto.preco,
     produto.categoria_id,
     produto.imagem
   ];
-
-  db.query(sql, values, callback);
+  db.query(sql, valores, callback);
 };
 
-// Atualizar produto existente
-Produto.atualizar = (id, produto, callback) => {
+// Buscar produto por ID
+exports.buscarPorId = (id, callback) => {
+  const sql = `
+    SELECT p.*, c.nome AS categoria_nome
+    FROM produtos p
+    JOIN categoria_produto c ON p.categoria_id = c.id
+    WHERE p.id = ?
+  `;
+  db.query(sql, [id], callback);
+};
+
+// Atualizar produto
+exports.atualizar = (id, produto, callback) => {
   const sql = `
     UPDATE produtos
-    SET nome = ?, descricao = ?, preco = ?, categoria_id = ?
+    SET nome = ?, descricao = ?, preco = ?, categoria_id = ?, imagem = ?
     WHERE id = ?
   `;
-  const values = [
+  const valores = [
     produto.nome,
     produto.descricao,
     produto.preco,
     produto.categoria_id,
+    produto.imagem || null, // se não mandar imagem, pode salvar null
     id
   ];
-
-  db.query(sql, values, callback);
+  db.query(sql, valores, callback);
 };
 
 // Excluir produto
-Produto.excluir = (id, callback) => {
-  db.query('DELETE FROM produtos WHERE id = ?', [id], callback);
+exports.excluir = (id, callback) => {
+  const sql = `DELETE FROM produtos WHERE id = ?`;
+  db.query(sql, [id], callback);
 };
-
-module.exports = Produto;

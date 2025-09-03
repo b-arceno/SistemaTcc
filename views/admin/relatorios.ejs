@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<%- include('../partials/navAdm') %>
+
+<h1>Relatórios</h1>
+
+<h2>Produtos por Categoria</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Categoria</th>
+      <th>Total de Produtos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (typeof relatorioProdutos !== 'undefined' && relatorioProdutos.length > 0) { %>
+      <% relatorioProdutos.forEach(item => { %>
+        <tr>
+          <td><%= item.categoria %></td>
+          <td><%= item.total_produtos %></td>
+        </tr>
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="2">Nenhum dado disponível</td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
+</body>
+</html>

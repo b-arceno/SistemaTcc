@@ -38,6 +38,7 @@ CREATE TABLE usuarios (
     email VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL,
     tipo_usuario_id INT NOT NULL,
+    telefone VARCHAR(20),
     FOREIGN KEY (tipo_usuario_id) REFERENCES tipo_usuario(id)
 );
 

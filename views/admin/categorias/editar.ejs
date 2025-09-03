@@ -1,0 +1,9 @@
+<%- include('../../partials/navAdm') %>
+
+<h1>Editar Categoria</h1>
+
+<form method="POST" action="/admin/categorias/editar/<%= categoria.id %>">
+  <label>Nome:</label>
+  <input type="text" name="nome" value="<%= categoria.nome %>" required><br>
+  <button type="submit">Atualizar</button>
+</form>

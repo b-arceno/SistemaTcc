@@ -7,16 +7,20 @@
 </head>
 <body>
 
-  <%- include('../partials/navbar') %>
+<%- include('../partials/header') %>
 
   <div class="produto-detalhes">
     <div class="imagem-grande">
-      <img src="/imagens/<%= produto.imagem %>" alt="<%= produto.nome %>" />
+      <% if (produto.imagem) { %>
+        <img src="/imagens/<%= produto.imagem %>" alt="<%= produto.nome %>" />
+      <% } else { %>
+        <p>Imagem indisponível</p>
+      <% } %>
     </div>
 
     <div class="info">
       <h2><%= produto.nome %></h2>
-      <p class="preco">R$ <%= produto.preco.toFixed(2) %></p>
+      <p class="preco">R$ <%= (produto.preco || 0).toFixed(2) %></p>
       <p><%= produto.descricao %></p>
 
       <form action="/loja/carrinho/adicionar" method="POST">
@@ -35,12 +39,12 @@
       </form>
     </div>
   </div>
-
+  <%- include('../partials/footer') %>\
   <script>
     function alterar(valor) {
       const input = document.getElementById('quantidade');
       let atual = parseInt(input.value);
-      if (atual + valor >= 1) {
+      if (!isNaN(atual) && atual + valor >= 1) {
         input.value = atual + valor;
       }
     }
