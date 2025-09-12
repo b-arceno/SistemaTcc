@@ -1,125 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Painel Administrativo - TiaLuDoces</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f1ff;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 50px auto;
-      padding: 0 20px;
-    }
-
-    h1.titulo-categoria {
-      text-align: center;
-      color: #af0a41;
-      margin-bottom: 40px;
-    }
-
-    .painel-admin {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-
-    .painel-card {
-      background-color: #fff;
-      border-radius: 15px;
-      padding: 30px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .painel-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .painel-card i {
-      color: #d9155c;
-      margin-bottom: 15px;
-    }
-
-    .painel-card h2 {
-      margin: 10px 0;
-      color: #af0a41;
-    }
-
-    .painel-card p {
-      color: #555;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .painel-card .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #d9155c;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: background-color 0.3s;
-    }
-
-    .painel-card .btn:hover {
-      background-color: #af0a41;
-    }
-  </style>
-</head>
-<body>
-
-  <%- include('../partials/navAdm') %>
-
-  <div class="container">
-    <h1 class="titulo-categoria">Painel Administrativo</h1>
-
-    <div class="painel-admin">
-      <div class="painel-card">
-        <i class="fa fa-tachometer-alt fa-3x"></i>
-        <h2>Dashboard</h2>
-        <p>Visão geral do sistema, estatísticas e notificações.</p>
-        <a href="/admin" class="btn">Acessar</a>
-      </div>
-
-      <div class="painel-card">
-        <i class="fa fa-cake fa-3x"></i>
-        <h2>Produtos</h2>
-        <p>Gerencie os produtos cadastrados na loja.</p>
-        <a href="/admin/produtos" class="btn">Acessar</a>
-      </div>
-
-      <div class="painel-card">
-        <i class="fa fa-list fa-3x"></i>
-        <h2>Categorias</h2>
-        <p>Visualizar ou cadastrar novas categorias.</p>
-        <a href="/admin/categorias" class="btn">Acessar</a>
-      </div>
-
-      <div class="painel-card">
-        <i class="fa fa-box fa-3x"></i>
-        <h2>Pedidos</h2>
-        <p>Veja os pedidos feitos pelos clientes.</p>
-        <a href="/admin/pedidos" class="btn">Acessar</a>
-      </div>
-
-      <div class="painel-card">
-        <i class="fa fa-chart-line fa-3x"></i>
-        <h2>Relatórios</h2>
-        <p>Visualize relatórios de vendas e produtos.</p>
-        <a href="/admin/relatorios" class="btn">Acessar</a>
-      </div>
-    </div>
+<h1 class="titulo-categoria">Painel Administrativo</h1>
+<div class="painel-admin">
+  <div class="painel-card">
+    <i class="fa fa-tachometer-alt fa-3x"></i>
+    <h2>Dashboard</h2>
+    <p>Visão geral do sistema, estatísticas e notificações.</p>
+    <a href="/admin" class="btn">Acessar</a>
   </div>
-
-</body>
-</html>
+  <div class="painel-card">
+    <i class="fa fa-cake fa-3x"></i>
+    <h2>Produtos</h2>
+    <p>Gerencie os produtos cadastrados na loja.</p>
+    <a href="/admin/produtos" class="btn">Acessar</a>
+  </div>
+  <div class="painel-card">
+    <i class="fa fa-list fa-3x"></i>
+    <h2>Categorias</h2>
+    <p>Visualizar ou cadastrar novas categorias.</p>
+    <a href="/admin/categorias" class="btn">Acessar</a>
+  </div>
+  <div class="painel-card">
+    <i class="fa fa-box fa-3x"></i>
+    <h2>Pedidos</h2>
+    <p>Veja os pedidos feitos pelos clientes.</p>
+    <a href="/admin/pedidos" class="btn">Acessar</a>
+  </div>
+  <div class="painel-card">
+    <i class="fa fa-chart-line fa-3x"></i>
+    <h2>Relatórios</h2>
+    <p>Visualize relatórios de vendas e produtos.</p>
+    <a href="/admin/relatorios" class="btn">Acessar</a>
+  </div>
+</div>

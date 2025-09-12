@@ -1,208 +1,185 @@
-const db = require('../config/database');
-const path = require('path');
-const fs = require('fs');
+const Produto = require('../models/produtoModel');
+const Categoria = require('../models/categoriaModel');
+const Pedido = require('../models/pedidoModel');
+const Relatorio = require('../models/relatorioModel');
+const Admin = require('../models/adminModel'); // se usar
 
-// ----------------- PRODUTOS -----------------
-exports.listar = (req, res) => {
-  const sql = `
-    SELECT p.id, p.nome, p.preco, p.descricao, c.nome AS categoria, p.imagem
-    FROM produtos p
-    JOIN categorias c ON p.categoria_id = c.id
-    ORDER BY p.id DESC
-  `;
-  db.query(sql, (err, resultados) => {
-    if (err) return res.send('Erro ao listar produtos.');
-    res.render('admin/produtos/listar', { produtos: resultados, session: req.session });
-  });
-};
+// -------------------- DASHBOARD --------------------
+exports.dashboard = async (req, res) => {
+  try {
+    const produtos = await Produto.listarTodos();
+    const categorias = await Categoria.listarTodos();
+    const pedidos = await Pedido.listarTodos();
 
-exports.novo = (req, res) => {
-  db.query('SELECT * FROM categorias', (err, categorias) => {
-    if (err) return res.send('Erro ao buscar categorias.');
-    res.render('admin/produtos/novo', { produto: null, categorias, session: req.session });
-  });
-};
+    const totalProdutos = produtos.length;
+    const totalCategorias = categorias.length;
+    const totalPedidos = pedidos.length;
 
-exports.inserir = (req, res) => {
-  const { nome, descricao, preco, categoria_id } = req.body;
-  const imagem = req.file ? req.file.filename : null;
-
-  db.query(
-    'INSERT INTO produtos (nome, descricao, preco, categoria_id, imagem) VALUES (?, ?, ?, ?, ?)',
-    [nome, descricao, preco, categoria_id, imagem],
-    (err) => {
-      if (err) return res.send('Erro ao inserir produto.');
-      res.redirect('/admin/produtos');
-    }
-  );
-};
-
-exports.editar = (req, res) => {
-  const { id } = req.params;
-  db.query('SELECT * FROM produtos WHERE id = ?', [id], (err, resultados) => {
-    if (err || resultados.length === 0) return res.send('Produto não encontrado.');
-    db.query('SELECT * FROM categorias', (err2, categorias) => {
-      if (err2) return res.send('Erro ao buscar categorias.');
-      res.render('admin/produtos/editar', { produto: resultados[0], categorias, session: req.session });
+    res.render('admin/painel', {
+      layout: 'admin/layoutAdmin',
+      titulo: 'Dashboard',
+      totalProdutos,
+      totalCategorias,
+      totalPedidos
     });
-  });
-};
-
-exports.atualizar = (req, res) => {
-  const { id } = req.params;
-  const { nome, descricao, preco, categoria_id } = req.body;
-  const imagem = req.file ? req.file.filename : null;
-
-  let sql = 'UPDATE produtos SET nome=?, descricao=?, preco=?, categoria_id=?';
-  const params = [nome, descricao, preco, categoria_id];
-
-  if (imagem) {
-    sql += ', imagem=?';
-    params.push(imagem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao carregar o dashboard');
   }
+};
 
-  sql += ' WHERE id=?';
-  params.push(id);
+// -------------------- PRODUTOS --------------------
+exports.listarProdutos = async (req, res) => {
+  try {
+    const produtos = await Produto.listarTodos();
+    res.render('admin/produtos', { layout: 'admin/layoutAdmin', titulo: 'Produtos', produtos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao listar produtos');
+  }
+};
 
-  db.query(sql, params, (err) => {
-    if (err) return res.send('Erro ao atualizar produto.');
+exports.formProduto = async (req, res) => {
+  try {
+    const categorias = await Categoria.listarTodos();
+    res.render('admin/formProduto', { layout: 'admin/layoutAdmin', titulo: 'Novo Produto', categorias });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao abrir formulário');
+  }
+};
+
+exports.criarProduto = async (req, res) => {
+  try {
+    await Produto.inserir(req.body);
     res.redirect('/admin/produtos');
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao criar produto');
+  }
 };
 
-exports.excluir = (req, res) => {
-  const { id } = req.params;
-  db.query('SELECT imagem FROM produtos WHERE id=?', [id], (err, resultados) => {
-    if (err) return res.send('Erro ao buscar produto.');
-    const imagem = resultados[0]?.imagem;
-    if (imagem) {
-      const caminho = path.join(__dirname, '../public/imagens', imagem);
-      if (fs.existsSync(caminho)) fs.unlinkSync(caminho);
-    }
-    db.query('DELETE FROM produtos WHERE id=?', [id], (err2) => {
-      if (err2) return res.send('Erro ao excluir produto.');
-      res.redirect('/admin/produtos');
-    });
-  });
+exports.formEditarProduto = async (req, res) => {
+  try {
+    const produto = await Produto.buscarPorId(req.params.id);
+    const categorias = await Categoria.listarTodos();
+    res.render('admin/formProduto', { layout: 'admin/layoutAdmin', titulo: 'Editar Produto', produto, categorias });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao abrir edição');
+  }
 };
 
-// ----------------- CATEGORIAS -----------------
-exports.listarCategorias = (req, res) => {
-  db.query('SELECT * FROM categorias ORDER BY id DESC', (err, resultados) => {
-    if (err) return res.send('Erro ao listar categorias.');
-    res.render('admin/categorias/listar', { categorias: resultados, session: req.session });
-  });
+exports.editarProduto = async (req, res) => {
+  try {
+    await Produto.atualizar(req.params.id, req.body);
+    res.redirect('/admin/produtos');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao editar produto');
+  }
 };
 
-exports.novaCategoria = (req, res) => {
-  res.render('admin/categorias/novo', { categoria: null, session: req.session });
+exports.deletarProduto = async (req, res) => {
+  try {
+    await Produto.excluir(req.params.id);
+    res.redirect('/admin/produtos');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao deletar produto');
+  }
 };
 
-exports.inserirCategoria = (req, res) => {
-  const { nome } = req.body;
-  db.query('INSERT INTO categorias (nome) VALUES (?)', [nome], (err) => {
-    if (err) return res.send('Erro ao inserir categoria.');
+// -------------------- CATEGORIAS --------------------
+exports.listarCategorias = async (req, res) => {
+  try {
+    const categorias = await Categoria.listarTodos();
+    res.render('admin/categorias', { layout: 'admin/layoutAdmin', titulo: 'Categorias', categorias });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao listar categorias');
+  }
+};
+
+exports.formCategoria = (req, res) => {
+  res.render('admin/formCategoria', { layout: 'admin/layoutAdmin', titulo: 'Nova Categoria' });
+};
+
+exports.criarCategoria = async (req, res) => {
+  try {
+    await Categoria.inserir(req.body);
     res.redirect('/admin/categorias');
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao criar categoria');
+  }
 };
 
-exports.editarCategoria = (req, res) => {
-  const { id } = req.params;
-  db.query('SELECT * FROM categorias WHERE id=?', [id], (err, resultados) => {
-    if (err || resultados.length === 0) return res.send('Categoria não encontrada.');
-    res.render('admin/categorias/editar', { categoria: resultados[0], session: req.session });
-  });
+exports.formEditarCategoria = async (req, res) => {
+  try {
+    const categoria = await Categoria.buscarPorId(req.params.id);
+    res.render('admin/formCategoria', { layout: 'admin/layoutAdmin', titulo: 'Editar Categoria', categoria });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao abrir edição de categoria');
+  }
 };
 
-exports.atualizarCategoria = (req, res) => {
-  const { id } = req.params;
-  const { nome } = req.body;
-  db.query('UPDATE categorias SET nome=? WHERE id=?', [nome, id], (err) => {
-    if (err) return res.send('Erro ao atualizar categoria.');
+exports.editarCategoria = async (req, res) => {
+  try {
+    await Categoria.atualizar(req.params.id, req.body);
     res.redirect('/admin/categorias');
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao editar categoria');
+  }
 };
 
-exports.excluirCategoria = (req, res) => {
-  const { id } = req.params;
-  db.query('DELETE FROM categorias WHERE id=?', [id], (err) => {
-    if (err) return res.send('Erro ao excluir categoria.');
+exports.deletarCategoria = async (req, res) => {
+  try {
+    await Categoria.excluir(req.params.id);
     res.redirect('/admin/categorias');
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao excluir categoria');
+  }
 };
-// ----------------- PEDIDOS -----------------
-exports.listarPedidos = (req, res) => {
-  const sql = `
-    SELECT 
-      p.id, 
-      p.data_pedido AS data,
-      p.total,
-      u.nome AS cliente,
-      sp.descricao AS status_pedido,
-      sg.descricao AS status_pagamento,
-      fp.descricao AS forma_pagamento
-    FROM pedidos p
-    JOIN usuarios u ON p.usuario_id = u.id
-    JOIN status_pedido sp ON p.status_pedido_id = sp.id
-    JOIN status_pagamento sg ON p.status_pagamento_id = sg.id
-    JOIN forma_pagamento fp ON p.forma_pagamento_id = fp.id
-    ORDER BY p.data_pedido DESC
-  `;
 
-  db.query(sql, (err, resultados) => {
-    if (err) {
-      console.error(err);
-      return res.send('Erro ao buscar pedidos.');
+// -------------------- PEDIDOS --------------------
+exports.listarPedidos = async (req, res) => {
+  try {
+    const pedidos = await Pedido.listarTodos();
+    res.render('admin/pedidos', { layout: 'admin/layoutAdmin', titulo: 'Pedidos', pedidos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao listar pedidos');
+  }
+};
+
+exports.verPedido = async (req, res) => {
+  try {
+    const pedido = await Pedido.buscarPorId(req.params.id);
+    res.render('admin/verPedido', { layout: 'admin/layoutAdmin', titulo: `Pedido #${pedido.id}`, pedido });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao buscar pedido');
+  }
+};
+
+// -------------------- RELATÓRIOS --------------------
+exports.gerarRelatorios = async (req, res) => {
+  try {
+    let { inicio, fim } = req.query;
+    if (!inicio || !fim) {
+      const hoje = new Date();
+      const trintaDias = new Date(hoje.getTime() - 29 * 24 * 60 * 60 * 1000);
+      inicio = trintaDias.toISOString().slice(0, 10);
+      fim = hoje.toISOString().slice(0, 10);
     }
-
-    // Garantir que total seja número
-    const pedidos = resultados.map(pedido => ({
-      ...pedido,
-      total: parseFloat(pedido.total)
-    }));
-
-    res.render('admin/pedidos', { pedidos, session: req.session });
-  });
-};
-exports.criarPedido = (req, res) => {
-  const { usuario_id, itens } = req.body; // itens = [{ produto_id, quantidade, preco }, ...]
-
-  // 1. Inserir pedido com total inicial 0
-  db.query(
-    'INSERT INTO pedidos (usuario_id, total) VALUES (?, 0)',
-    [usuario_id],
-    (err, resultadoPedido) => {
-      if (err) return res.send('Erro ao criar pedido.');
-
-      const pedido_id = resultadoPedido.insertId;
-
-      // 2. Inserir itens do pedido
-      const valoresItens = itens.map(item => [pedido_id, item.produto_id, item.quantidade, item.preco]);
-      db.query(
-        'INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco) VALUES ?',
-        [valoresItens],
-        (err2) => {
-          if (err2) return res.send('Erro ao adicionar itens do pedido.');
-
-          // 3. Atualizar total do pedido
-          const total = itens.reduce((acc, item) => acc + item.quantidade * item.preco, 0);
-          db.query(
-            'UPDATE pedidos SET total=? WHERE id=?',
-            [total, pedido_id],
-            (err3) => {
-              if (err3) return res.send('Erro ao calcular total do pedido.');
-
-              res.send('Pedido criado com sucesso!');
-            }
-          );
-        }
-      );
-    }
-  );
-};
-
-
-// ----------------- RELATÓRIOS -----------------
-exports.gerarRelatorios = (req, res) => {
-  res.send('Funcionalidade de relatórios ainda não implementada.');
+    const relatorioProdutos = await Relatorio.vendasPorPeriodo(inicio, fim);
+    res.render('admin/relatorios', { layout: 'admin/layoutAdmin', titulo: 'Relatórios', relatorioProdutos, inicio, fim });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao gerar relatórios');
+  }
 };

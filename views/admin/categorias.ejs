@@ -1,0 +1,30 @@
+<h1>Categorias</h1>
+
+<% if (acao === 'listar') { %>
+  <a href="/admin/categorias/novo" class="btn">Nova Categoria</a>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Nome</th><th>Ações</th></tr>
+    </thead>
+    <tbody>
+      <% categorias.forEach(cat => { %>
+        <tr>
+          <td><%= cat.id %></td>
+          <td><%= cat.nome %></td>
+          <td>
+            <a href="/admin/categorias/editar/<%= cat.id %>">Editar</a> |
+            <a href="/admin/categorias/excluir/<%= cat.id %>">Excluir</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } else { %>
+  <!-- Formulário Novo / Editar -->
+  <h1><%= acao === 'novo' ? 'Nova Categoria' : 'Editar Categoria' %></h1>
+  <form action="<%= acao === 'editar' ? '/admin/categorias/editar/' + categoria.id : '/admin/categorias/novo' %>" method="POST">
+    <label>Nome</label>
+    <input type="text" name="nome" value="<%= categoria?.nome || '' %>" required>
+    <button type="submit">Salvar</button>
+  </form>
+<% } %>

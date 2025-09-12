@@ -1,20 +1,24 @@
-<% layout('admin/layout', { titulo: 'Dashboard', usuario }) %>
+<% layout('admin/layoutAdmin') %>
 
-<h1>Dashboard</h1>
 <div class="cards">
   <div class="card">
-    <i class="fa fa-box"></i>
-    <h2>Pedidos</h2>
-    <p>0 pedidos esta semana</p>
-  </div>
-  <div class="card">
     <i class="fa fa-cake"></i>
-    <h2>Produtos</h2>
-    <p>10 produtos cadastrados</p>
+    <h2><%= totalProdutos %></h2>
+    <p>Produtos cadastrados</p>
+    <a href="/admin/produtos" class="btn">Ver Produtos</a>
   </div>
+
   <div class="card">
     <i class="fa fa-list"></i>
-    <h2>Categorias</h2>
-    <p>5 categorias cadastradas</p>
+    <h2><%= totalCategorias %></h2>
+    <p>Categorias cadastradas</p>
+    <a href="/admin/categorias" class="btn">Ver Categorias</a>
+  </div>
+
+  <div class="card">
+    <i class="fa fa-box"></i>
+    <h2><%= totalPedidos %></h2>
+    <p>Pedidos realizados</p>
+    <a href="/admin/pedidos" class="btn">Ver Pedidos</a>
   </div>
 </div>
