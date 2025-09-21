@@ -1,30 +1,108 @@
-<h1>Categorias</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gerenciar Categorias</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin: 0; padding: 20px; }
+    h1 { color: #4B0082; }
+    a { text-decoration: none; color: #fff; background: #4B0082; padding: 6px 12px; border-radius: 4px; margin-right: 5px; }
+    a:hover { opacity: 0.8; }
 
-<% if (acao === 'listar') { %>
-  <a href="/admin/categorias/novo" class="btn">Nova Categoria</a>
+    table { width: 70%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: #4B0082; color: #fff; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+
+    button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+    .add-btn { background-color: #28a745; color: white; }
+    .edit-btn { background-color: #ffc107; color: white; }
+    .delete-btn { background-color: #dc3545; color: white; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; 
+             overflow: auto; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border-radius: 6px; width: 300px; }
+    .close { color: #aaa; float: right; font-size: 24px; font-weight: bold; cursor: pointer; }
+    .close:hover { color: #000; }
+    input[type="text"], input[type="submit"] { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+    input[type="submit"] { background-color: #4B0082; color: white; border: none; cursor: pointer; }
+    input[type="submit"]:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <h1>Gerenciar Categorias</h1>
+  <a href="/admin">Voltar ao Painel</a>
+
+  <!-- Botão adicionar -->
+  <button class="add-btn" onclick="abrirModalAdicionar()">Adicionar Categoria</button>
+
+  <!-- Tabela de categorias -->
   <table>
-    <thead>
-      <tr><th>ID</th><th>Nome</th><th>Ações</th></tr>
-    </thead>
-    <tbody>
-      <% categorias.forEach(cat => { %>
-        <tr>
-          <td><%= cat.id %></td>
-          <td><%= cat.nome %></td>
-          <td>
-            <a href="/admin/categorias/editar/<%= cat.id %>">Editar</a> |
-            <a href="/admin/categorias/excluir/<%= cat.id %>">Excluir</a>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Ações</th>
+    </tr>
+    <% categorias.forEach(cat => { %>
+      <tr>
+        <td><%= cat.id %></td>
+        <td><%= cat.nome %></td>
+        <td>
+          <button class="edit-btn" onclick="abrirModalEditar(<%= cat.id %>, '<%= cat.nome %>')">Editar</button>
+          <a href="/admin/categorias/deletar/<%= cat.id %>" class="delete-btn">Deletar</a>
+        </td>
+      </tr>
+    <% }) %>
   </table>
-<% } else { %>
-  <!-- Formulário Novo / Editar -->
-  <h1><%= acao === 'novo' ? 'Nova Categoria' : 'Editar Categoria' %></h1>
-  <form action="<%= acao === 'editar' ? '/admin/categorias/editar/' + categoria.id : '/admin/categorias/novo' %>" method="POST">
-    <label>Nome</label>
-    <input type="text" name="nome" value="<%= categoria?.nome || '' %>" required>
-    <button type="submit">Salvar</button>
-  </form>
-<% } %>
+
+  <!-- Modal Adicionar -->
+  <div id="modalAdicionar" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalAdicionar()">&times;</span>
+      <h2>Adicionar Categoria</h2>
+      <form action="/admin/categorias" method="POST">
+        <input type="text" name="nome" placeholder="Nome da categoria" required>
+        <input type="submit" value="Adicionar">
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar -->
+  <div id="modalEditar" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModalEditar()">&times;</span>
+      <h2>Editar Categoria</h2>
+      <form id="formEditar" method="POST">
+        <input type="text" name="nome" id="nomeEditar" required>
+        <input type="submit" value="Atualizar">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Abrir modal adicionar
+    function abrirModalAdicionar() {
+      document.getElementById('modalAdicionar').style.display = 'block';
+    }
+    function fecharModalAdicionar() {
+      document.getElementById('modalAdicionar').style.display = 'none';
+    }
+
+    // Abrir modal editar
+    function abrirModalEditar(id, nome) {
+      document.getElementById('modalEditar').style.display = 'block';
+      document.getElementById('nomeEditar').value = nome;
+      document.getElementById('formEditar').action = '/admin/categorias/editar/' + id;
+    }
+    function fecharModalEditar() {
+      document.getElementById('modalEditar').style.display = 'none';
+    }
+
+    // Fechar modal ao clicar fora
+    window.onclick = function(event) {
+      if (event.target == document.getElementById('modalAdicionar')) fecharModalAdicionar();
+      if (event.target == document.getElementById('modalEditar')) fecharModalEditar();
+    }
+  </script>
+</body>
+</html>

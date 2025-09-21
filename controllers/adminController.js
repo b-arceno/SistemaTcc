@@ -1,185 +1,63 @@
-const Produto = require('../models/produtoModel');
-const Categoria = require('../models/categoriaModel');
-const Pedido = require('../models/pedidoModel');
-const Relatorio = require('../models/relatorioModel');
-const Admin = require('../models/adminModel'); // se usar
+const db = require('../config/database');
+const bcrypt = require('bcrypt');
 
-// -------------------- DASHBOARD --------------------
-exports.dashboard = async (req, res) => {
-  try {
-    const produtos = await Produto.listarTodos();
-    const categorias = await Categoria.listarTodos();
-    const pedidos = await Pedido.listarTodos();
+exports.listar = (req, res) => {
+  db.query('SELECT * FROM Admin', (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+};
 
-    const totalProdutos = produtos.length;
-    const totalCategorias = categorias.length;
-    const totalPedidos = pedidos.length;
+exports.criar = async (req, res) => {
+  const { nome, email, senha } = req.body;
+  const senhaHash = await bcrypt.hash(senha, 10);
 
-    res.render('admin/painel', {
-      layout: 'admin/layoutAdmin',
-      titulo: 'Dashboard',
-      totalProdutos,
-      totalCategorias,
-      totalPedidos
+  db.query('INSERT INTO Admin (nome, email, senha) VALUES (?, ?, ?)', 
+    [nome, email, senhaHash], 
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ id: results.insertId, nome, email });
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao carregar o dashboard');
-  }
 };
 
-// -------------------- PRODUTOS --------------------
-exports.listarProdutos = async (req, res) => {
-  try {
-    const produtos = await Produto.listarTodos();
-    res.render('admin/produtos', { layout: 'admin/layoutAdmin', titulo: 'Produtos', produtos });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao listar produtos');
-  }
+exports.buscarPorId = (req, res) => {
+  db.query('SELECT * FROM Admin WHERE id = ?', [req.params.id], 
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json(result[0]);
+    });
 };
 
-exports.formProduto = async (req, res) => {
-  try {
-    const categorias = await Categoria.listarTodos();
-    res.render('admin/formProduto', { layout: 'admin/layoutAdmin', titulo: 'Novo Produto', categorias });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao abrir formulário');
-  }
+exports.atualizar = (req, res) => {
+  const { nome, email } = req.body;
+  db.query('UPDATE Admin SET nome = ?, email = ? WHERE id = ?', 
+    [nome, email, req.params.id], 
+    (err) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: "Admin atualizado com sucesso" });
+    });
 };
 
-exports.criarProduto = async (req, res) => {
-  try {
-    await Produto.inserir(req.body);
-    res.redirect('/admin/produtos');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao criar produto');
-  }
+exports.deletar = (req, res) => {
+  db.query('DELETE FROM Admin WHERE id = ?', [req.params.id], 
+    (err) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: "Admin deletado com sucesso" });
+    });
 };
 
-exports.formEditarProduto = async (req, res) => {
-  try {
-    const produto = await Produto.buscarPorId(req.params.id);
-    const categorias = await Categoria.listarTodos();
-    res.render('admin/formProduto', { layout: 'admin/layoutAdmin', titulo: 'Editar Produto', produto, categorias });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao abrir edição');
-  }
-};
+exports.login = (req, res) => {
+  const { email, senha } = req.body;
 
-exports.editarProduto = async (req, res) => {
-  try {
-    await Produto.atualizar(req.params.id, req.body);
-    res.redirect('/admin/produtos');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao editar produto');
-  }
-};
+  db.query('SELECT * FROM Admin WHERE email = ?', [email], async (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    if (result.length === 0) return res.status(404).json({ error: "Admin não encontrado" });
 
-exports.deletarProduto = async (req, res) => {
-  try {
-    await Produto.excluir(req.params.id);
-    res.redirect('/admin/produtos');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao deletar produto');
-  }
-};
+    const admin = result[0];
+    const senhaValida = await bcrypt.compare(senha, admin.senha);
 
-// -------------------- CATEGORIAS --------------------
-exports.listarCategorias = async (req, res) => {
-  try {
-    const categorias = await Categoria.listarTodos();
-    res.render('admin/categorias', { layout: 'admin/layoutAdmin', titulo: 'Categorias', categorias });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao listar categorias');
-  }
-};
+    if (!senhaValida) return res.status(401).json({ error: "Senha inválida" });
 
-exports.formCategoria = (req, res) => {
-  res.render('admin/formCategoria', { layout: 'admin/layoutAdmin', titulo: 'Nova Categoria' });
-};
-
-exports.criarCategoria = async (req, res) => {
-  try {
-    await Categoria.inserir(req.body);
-    res.redirect('/admin/categorias');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao criar categoria');
-  }
-};
-
-exports.formEditarCategoria = async (req, res) => {
-  try {
-    const categoria = await Categoria.buscarPorId(req.params.id);
-    res.render('admin/formCategoria', { layout: 'admin/layoutAdmin', titulo: 'Editar Categoria', categoria });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao abrir edição de categoria');
-  }
-};
-
-exports.editarCategoria = async (req, res) => {
-  try {
-    await Categoria.atualizar(req.params.id, req.body);
-    res.redirect('/admin/categorias');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao editar categoria');
-  }
-};
-
-exports.deletarCategoria = async (req, res) => {
-  try {
-    await Categoria.excluir(req.params.id);
-    res.redirect('/admin/categorias');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao excluir categoria');
-  }
-};
-
-// -------------------- PEDIDOS --------------------
-exports.listarPedidos = async (req, res) => {
-  try {
-    const pedidos = await Pedido.listarTodos();
-    res.render('admin/pedidos', { layout: 'admin/layoutAdmin', titulo: 'Pedidos', pedidos });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao listar pedidos');
-  }
-};
-
-exports.verPedido = async (req, res) => {
-  try {
-    const pedido = await Pedido.buscarPorId(req.params.id);
-    res.render('admin/verPedido', { layout: 'admin/layoutAdmin', titulo: `Pedido #${pedido.id}`, pedido });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao buscar pedido');
-  }
-};
-
-// -------------------- RELATÓRIOS --------------------
-exports.gerarRelatorios = async (req, res) => {
-  try {
-    let { inicio, fim } = req.query;
-    if (!inicio || !fim) {
-      const hoje = new Date();
-      const trintaDias = new Date(hoje.getTime() - 29 * 24 * 60 * 60 * 1000);
-      inicio = trintaDias.toISOString().slice(0, 10);
-      fim = hoje.toISOString().slice(0, 10);
-    }
-    const relatorioProdutos = await Relatorio.vendasPorPeriodo(inicio, fim);
-    res.render('admin/relatorios', { layout: 'admin/layoutAdmin', titulo: 'Relatórios', relatorioProdutos, inicio, fim });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Erro ao gerar relatórios');
-  }
+    res.json({ message: "Login realizado com sucesso", admin: { id: admin.id, nome: admin.nome, email: admin.email } });
+  });
 };

@@ -8,57 +8,56 @@
 <body>
   <%- include('../partials/header') %>
 
-  <h1 class="titulo-categoria">Seu Carrinho</h1>
+  <main class="container">
+    <h1 class="page-title">🛒 Seu Carrinho</h1>
 
-  <% if (!carrinho || carrinho.length === 0) { %>
-    <p style="text-align: center;">Seu carrinho está vazio.</p>
-    <div style="text-align:center; margin-top:20px;">
-      <a href="/loja">
-        <button>Voltar para a Loja</button>
-      </a>
-    </div>
-  <% } else { %>
-    <div class="produtos-container">
-      <% let total = 0; %>
-      <% carrinho.forEach(p => { %>
-        <% let subtotal = p.preco * p.quantidade; %>
-        <% total += subtotal; %>
-        <div class="produto-card">
-          <img src="/imagens/<%= p.imagem %>" alt="<%= p.nome %>" />
-          <p><%= p.nome %></p>
-          <strong>Subtotal: R$ <%= subtotal.toFixed(2) %></strong>
-          <p>Qtd: <%= p.quantidade %></p>
+    <% if (!carrinho || carrinho.length === 0) { %>
+      <p class="mensagem-vazia">Seu carrinho está vazio.</p>
+      <div class="acoes-centrais">
+        <a href="/loja" class="btn">Voltar para a Loja</a>
+      </div>
+    <% } else { %>
+      <div class="produtos-lista">
+        <% let total = 0; %>
+        <% carrinho.forEach(p => { 
+             let subtotal = p.preco * p.quantidade;
+             total += subtotal;
+        %>
+          <div class="produto-card">
+            <img src="/imagens/<%= p.imagem %>" alt="<%= p.nome %>" class="produto-img" />
+            <div class="produto-info">
+              <h3><%= p.nome %></h3>
+              <p>Qtd: <%= p.quantidade %></p>
+              <p><strong>Subtotal:</strong> R$ <%= subtotal.toFixed(2) %></p>
 
-          <!-- Atualizar quantidade -->
-          <form action="/loja/carrinho/atualizar" method="POST" style="margin-top:10px;">
-            <input type="hidden" name="produtoId" value="<%= p.produtoId %>">
-            <input type="number" name="quantidade" value="<%= p.quantidade %>" min="1" style="width:50px;">
-            <button type="submit">Atualizar</button>
-          </form>
+              <!-- Atualizar quantidade -->
+              <form action="/loja/carrinho/atualizar" method="POST" class="form-inline">
+                <input type="hidden" name="produtoId" value="<%= p.produtoId %>">
+                <input type="number" name="quantidade" value="<%= p.quantidade %>" min="1" class="input-qtd">
+                <button type="submit" class="btn btn-small">Atualizar</button>
+              </form>
 
-          <!-- Remover produto -->
-          <form action="/loja/carrinho/remover" method="POST" style="margin-top:5px;">
-            <input type="hidden" name="produtoId" value="<%= p.produtoId %>">
-            <button type="submit">Remover</button>
-          </form>
-        </div>
-      <% }) %>
-    </div>
+              <!-- Remover produto -->
+              <form action="/loja/carrinho/remover" method="POST" class="form-inline">
+                <input type="hidden" name="produtoId" value="<%= p.produtoId %>">
+                <button type="submit" class="btn btn-danger btn-small">Remover</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
 
-    <!-- Total geral -->
-    <h3 style="text-align:center; margin-top:20px;">Total: R$ <%= total.toFixed(2) %></h3>
+      <!-- Total geral -->
+      <h3 class="total-geral">Total: R$ <%= total.toFixed(2) %></h3>
 
-    <!-- Finalizar pedido -->
-    <div style="text-align:center; margin-top:20px;">
-      <a href="/loja/checkout">
-        <button>Finalizar Pedido</button>
-      </a>
-      <a href="/loja" style="margin-left: 20px;">
-        <button>Continuar Comprando</button>
-      </a>
-    </div>
-  <% } %>
-    <%- include('../partials/footer') %>
+      <!-- Finalizar pedido -->
+      <div class="acoes-centrais">
+        <a href="/loja/checkout" class="btn btn-success">Finalizar Pedido</a>
+        <a href="/loja" class="btn">Continuar Comprando</a>
+      </div>
+    <% } %>
+  </main>
 
+  <%- include('../partials/footer') %>
 </body>
 </html>

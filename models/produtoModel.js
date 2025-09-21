@@ -1,49 +1,24 @@
-const db = require('../config/database');
+const db = require('../config/db');
 
-const Produto = {};
-
-Produto.listarTodos = () => new Promise((resolve, reject) => {
+exports.getAll = (cb) => {
   const sql = `
     SELECT p.*, c.nome AS categoria_nome
     FROM produtos p
     LEFT JOIN categorias c ON p.categoria_id = c.id
-    ORDER BY p.id DESC
-  `;
-  db.query(sql, (err, results) => err ? reject(err) : resolve(results));
-});
+    ORDER BY p.id DESC`;
+  db.query(sql, cb);
+};
 
-Produto.buscarPorId = (id) => new Promise((resolve, reject) => {
-  const sql = 'SELECT * FROM produtos WHERE id = ?';
-  db.query(sql, [id], (err, results) => err ? reject(err) : resolve(results[0]));
-});
+exports.getById = (id, cb) => db.query('SELECT * FROM produtos WHERE id=?', [id], cb);
 
-Produto.inserir = (produto) => new Promise((resolve, reject) => {
-  const sql = `INSERT INTO produtos (nome, descricao, preco, categoria_id, imagem) VALUES (?, ?, ?, ?, ?)`;
-  const values = [
-    produto.nome,
-    produto.descricao,
-    produto.preco,
-    produto.categoria_id || null,
-    produto.imagem || null
-  ];
-  db.query(sql, values, (err, result) => err ? reject(err) : resolve(result));
-});
+exports.create = (produto, cb) => {
+  const sql = 'INSERT INTO produtos (nome, descricao, preco, categoria_id, imagem) VALUES (?,?,?,?,?)';
+  db.query(sql, [produto.nome, produto.descricao, produto.preco, produto.categoria_id, produto.imagem], cb);
+};
 
-Produto.atualizar = (id, produto) => new Promise((resolve, reject) => {
-  const sql = `UPDATE produtos SET nome = ?, descricao = ?, preco = ?, categoria_id = ?, imagem = ? WHERE id = ?`;
-  const values = [
-    produto.nome,
-    produto.descricao,
-    produto.preco,
-    produto.categoria_id || null,
-    produto.imagem || null,
-    id
-  ];
-  db.query(sql, values, (err, result) => err ? reject(err) : resolve(result));
-});
+exports.update = (id, produto, cb) => {
+  const sql = 'UPDATE produtos SET nome=?, descricao=?, preco=?, categoria_id=?, imagem=? WHERE id=?';
+  db.query(sql, [produto.nome, produto.descricao, produto.preco, produto.categoria_id, produto.imagem, id], cb);
+};
 
-Produto.excluir = (id) => new Promise((resolve, reject) => {
-  db.query('DELETE FROM produtos WHERE id = ?', [id], (err, result) => err ? reject(err) : resolve(result));
-});
-
-module.exports = Produto;
+exports.delete = (id, cb) => db.query('DELETE FROM produtos WHERE id=?', [id], cb);

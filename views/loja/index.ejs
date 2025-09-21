@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel da Loja</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Bem-vindo(a), <%= usuario.nome %>!</h1>
+    <nav>
+      <a href="/loja" class="btn">Produtos</a>
+      <a href="/loja/categorias" class="btn">Categorias</a>
+      <a href="/loja/pedidos" class="btn">Meus Pedidos</a>
+      <a href="/logout" class="btn btn-outline">Sair</a>
+    </nav>
+  </div>
+</body>
+</html>

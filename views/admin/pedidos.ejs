@@ -1,57 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Pedidos - Admin</title>
-  <link rel="stylesheet" href="/css/admin.css">
+  <title>Pedidos - Painel Admin</title>
   <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px; }
+    h1 { color: #4B0082; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background-color: #f4f4f4; }
-    .status { padding: 5px 10px; border-radius: 5px; color: #fff; display: inline-block; }
-    .pendente { background-color: #f59e0b; }
-    .aprovado { background-color: #10b981; }
-    .cancelado { background-color: #ef4444; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #4B0082; color: white; }
+    button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
+    .update-btn { background-color: #28a745; color: white; }
   </style>
 </head>
 <body>
   <h1>Pedidos</h1>
+
   <table>
     <thead>
       <tr>
         <th>ID</th>
         <th>Cliente</th>
         <th>Data</th>
-        <th>Total</th>
         <th>Status Pedido</th>
         <th>Status Pagamento</th>
-        <th>Forma de Pagamento</th>
+        <th>Forma Pagamento</th>
+        <th>Total</th>
+        <th>Ações</th>
       </tr>
     </thead>
     <tbody>
-      <% if (pedidos.length === 0) { %>
+      <% pedidos.forEach(p => { %>
         <tr>
-          <td colspan="7">Nenhum pedido encontrado.</td>
-        </tr>
-      <% } %>
-
-      <% pedidos.forEach(pedido => { %>
-        <tr>
-          <td><%= pedido.id %></td>
-          <td><%= pedido.cliente %></td>
-          <td><%= new Date(pedido.data).toLocaleString('pt-BR') %></td>
-          <td>R$ <%= pedido.total.toFixed(2) %></td>
+          <td><%= p.id %></td>
+          <td><%= p.cliente %></td>
+          <td><%= new Date(p.data_pedido).toLocaleString() %></td>
+          <td><%= p.status_pedido %></td>
+          <td><%= p.status_pagamento %></td>
+          <td><%= p.forma_pagamento %></td>
+          <td>R$ <%= Number(p.total).toFixed(2) %></td>
           <td>
-            <span class="status <%= pedido.status_pedido.toLowerCase() %>">
-              <%= pedido.status_pedido %>
-            </span>
+            <form action="/admin/pedidos/atualizar-status/<%= p.id %>" method="POST">
+              <select name="status_pedido_id" required>
+                <option value="1" <%= p.status_pedido == 'Pendente' ? 'selected' : '' %>>Pendente</option>
+                <option value="2" <%= p.status_pedido == 'Em andamento' ? 'selected' : '' %>>Em andamento</option>
+                <option value="3" <%= p.status_pedido == 'Concluído' ? 'selected' : '' %>>Concluído</option>
+              </select>
+              <button class="update-btn" type="submit">Atualizar</button>
+            </form>
           </td>
-          <td>
-            <span class="status <%= pedido.status_pagamento.toLowerCase() %>">
-              <%= pedido.status_pagamento %>
-            </span>
-          </td>
-          <td><%= pedido.forma_pagamento %></td>
         </tr>
       <% }) %>
     </tbody>

@@ -1,28 +1,72 @@
-<%- include('../partials/header') %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meus Pedidos</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <%- include('../partials/header') %>
 
-<h2>Meus Pedidos</h2>
+  <main class="container">
+    <h1 class="page-title">📦 Meus Pedidos</h1>
 
-<% if (!pedidos || pedidos.length === 0) { %>
-  <p>Você ainda não fez nenhum pedido.</p>
-<% } else { %>
-  <table border="1" cellpadding="8" cellspacing="0">
-    <tr>
-      <th>ID</th>
-      <th>Data</th>
-      <th>Status Pedido</th>
-      <th>Status Pagamento</th>
-      <th>Forma de Pagamento</th>
-    </tr>
-    <% pedidos.forEach(p => { %>
-      <tr>
-        <td><%= p.id %></td>
-        <td><%= new Date(p.data_pedido).toLocaleString('pt-BR') %></td>
-        <td><%= p.status_pedido %></td>
-        <td><%= p.status_pagamento %></td>
-        <td><%= p.forma_pagamento %></td>
-      </tr>
-    <% }) %>
-  </table>
-<% } %>
+    <% if (!pedidos || pedidos.length === 0) { %>
+      <p class="mensagem-vazia">Você ainda não fez nenhum pedido.</p>
+    <% } else { %>
+      <table class="tabela-pedidos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Status Pedido</th>
+            <th>Status Pagamento</th>
+            <th>Forma de Pagamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pedidos.forEach(p => { %>
+            <tr>
+              <td><%= p.id %></td>
+              <td><%= new Date(p.data_pedido).toLocaleString('pt-BR') %></td>
+              <td><span class="badge <%= p.status_pedido %>"><%= p.status_pedido %></span></td>
+              <td><%= p.status_pagamento %></td>
+              <td><%= p.forma_pagamento %></td>
+            </tr>
 
-<%- include('../partials/footer') %>
+            <!-- Itens do pedido -->
+            <% if (p.itens && p.itens.length > 0) { %>
+              <tr class="linha-itens">
+                <td colspan="5">
+                  <table class="tabela-itens">
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Preço Unitário</th>
+                        <th>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% p.itens.forEach(item => { %>
+                        <tr>
+                          <td><%= item.nome %></td>
+                          <td><%= item.quantidade %></td>
+                          <td>R$ <%= item.preco.toFixed(2) %></td>
+                          <td>R$ <%= (item.quantidade * item.preco).toFixed(2) %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            <% } %>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

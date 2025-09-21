@@ -1,24 +1,64 @@
-<% layout('admin/layoutAdmin') %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Painel Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px; }
+    h1 { color: #4B0082; margin-bottom: 20px; }
+    .welcome { margin-bottom: 30px; font-size: 18px; }
+    .dashboard { display: flex; gap: 20px; flex-wrap: wrap; }
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 200px;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: scale(1.05); }
+    .card a {
+      display: block;
+      margin-top: 10px;
+      padding: 10px 0;
+      background-color: #4B0082;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    .logout { margin-top: 40px; display: inline-block; background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
 
-<div class="cards">
-  <div class="card">
-    <i class="fa fa-cake"></i>
-    <h2><%= totalProdutos %></h2>
-    <p>Produtos cadastrados</p>
-    <a href="/admin/produtos" class="btn">Ver Produtos</a>
+  <h1>Painel Admin</h1>
+  <p class="welcome">Bem-vindo, <%= usuario.nome %>!</p>
+
+  <div class="dashboard">
+    <div class="card">
+      <h2>Categorias</h2>
+      <a href="/admin/categorias">Gerenciar</a>
+    </div>
+
+    <div class="card">
+      <h2>Produtos</h2>
+      <a href="/admin/produtos">Gerenciar</a>
+    </div>
+
+    <div class="card">
+      <h2>Pedidos</h2>
+      <a href="/admin/pedidos">Gerenciar</a>
+    </div>
+
+    <div class="card">
+      <h2>Relatórios</h2>
+      <a href="/admin/relatorios">Visualizar</a>
+    </div>
   </div>
 
-  <div class="card">
-    <i class="fa fa-list"></i>
-    <h2><%= totalCategorias %></h2>
-    <p>Categorias cadastradas</p>
-    <a href="/admin/categorias" class="btn">Ver Categorias</a>
-  </div>
+  <a class="logout" href="/logout">Sair</a>
 
-  <div class="card">
-    <i class="fa fa-box"></i>
-    <h2><%= totalPedidos %></h2>
-    <p>Pedidos realizados</p>
-    <a href="/admin/pedidos" class="btn">Ver Pedidos</a>
-  </div>
-</div>
+</body>
+</html>

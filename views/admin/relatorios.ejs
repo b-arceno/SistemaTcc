@@ -1,25 +1,53 @@
-<h1>Relatórios</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Relatórios - Painel Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f8f8; }
+    h1 { color: #4B0082; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #4B0082; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Relatórios</h1>
 
-<h2>Produtos por Categoria</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Categoria</th>
-      <th>Total de Produtos</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (relatorioProdutos && relatorioProdutos.length > 0) { %>
-      <% relatorioProdutos.forEach(item => { %>
+  <h2>Total de Vendas por Dia</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Total Vendas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% vendas.forEach(v => { %>
         <tr>
-          <td><%= item.categoria %></td>
-          <td><%= item.total_produtos %></td>
+          <td><%= new Date(v.data).toLocaleDateString() %></td>
+          <td>R$ <%= Number(v.total_vendas).toFixed(2) %></td>
         </tr>
       <% }) %>
-    <% } else { %>
+    </tbody>
+  </table>
+
+  <h2>Pedidos por Status</h2>
+  <table>
+    <thead>
       <tr>
-        <td colspan="2">Nenhum dado disponível</td>
+        <th>Status</th>
+        <th>Total de Pedidos</th>
       </tr>
-    <% } %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% status.forEach(s => { %>
+        <tr>
+          <td><%= s.status %></td>
+          <td><%= s.total %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>
