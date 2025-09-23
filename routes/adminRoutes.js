@@ -1,207 +1,94 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database'); // já é o .promise()
+const db = require('../config/database');
+const { isAdmin } = require('../middlewares/auth');
 
-// Middleware para proteger rotas de admin
-function isAdmin(req, res, next) {
-    if (req.session.usuario && req.session.usuario.tipo_usuario_id === 1) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
-}
-
-// -------------------------
-// DASHBOARD
-// -------------------------
-router.get('/', isAdmin, (req, res) => {
+router.get('/', isAdmin, async (req, res) => {
     res.render('admin/dashboard', { usuario: req.session.usuario });
 });
 
-// -------------------------
-// CRUD CATEGORIAS
-// -------------------------
-
-// Listar categorias
+// CATEGORIAS
 router.get('/categorias', isAdmin, async (req, res) => {
-    try {
-        const editarId = req.query.editar;
-        const [categorias] = await db.query('SELECT * FROM categoria_produto');
-
-        let categoriaParaEditar = null;
-        if (editarId) {
-            categoriaParaEditar = categorias.find(c => c.id == editarId);
-        }
-
-        res.render('admin/categorias', { categorias, categoriaParaEditar });
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao buscar categorias.');
-    }
+    const [categorias] = await db.query('SELECT * FROM categoria_produto');
+    res.render('admin/categorias', { categorias });
 });
 
-// Adicionar categoria
 router.post('/categorias', isAdmin, async (req, res) => {
-    try {
-        const { nome } = req.body;
-        if (!nome) return res.status(400).send('Nome é obrigatório');
-        await db.query('INSERT INTO categoria_produto (nome) VALUES (?)', [nome]);
-        res.redirect('/admin/categorias');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao adicionar categoria.');
-    }
+    const { nome } = req.body;
+    if (!nome) return res.status(400).send('Nome é obrigatório');
+    await db.query('INSERT INTO categoria_produto (nome) VALUES (?)', [nome]);
+    res.redirect('/admin/categorias');
 });
 
-// Atualizar categoria
 router.post('/categorias/editar/:id', isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nome } = req.body;
-        await db.query('UPDATE categoria_produto SET nome=? WHERE id=?', [nome, id]);
-        res.redirect('/admin/categorias');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao atualizar categoria.');
-    }
+    const { id } = req.params;
+    const { nome } = req.body;
+    await db.query('UPDATE categoria_produto SET nome=? WHERE id=?', [nome, id]);
+    res.redirect('/admin/categorias');
 });
 
-// Deletar categoria
 router.get('/categorias/deletar/:id', isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        await db.query('DELETE FROM categoria_produto WHERE id=?', [id]);
-        res.redirect('/admin/categorias');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao excluir categoria.');
-    }
+    const { id } = req.params;
+    await db.query('DELETE FROM categoria_produto WHERE id=?', [id]);
+    res.redirect('/admin/categorias');
 });
 
-// -------------------------
-// CRUD PRODUTOS
-// -------------------------
-
+// PRODUTOS
 router.get('/produtos', isAdmin, async (req, res) => {
-    try {
-        const editarId = req.query.editar;
-
-        const [produtos] = await db.query(`
-            SELECT p.*, c.nome AS categoria_nome
-            FROM produtos p
-            JOIN categoria_produto c ON p.categoria_id = c.id
-        `);
-
-        const [categorias] = await db.query('SELECT * FROM categoria_produto');
-
-        let produtoParaEditar = null;
-        if (editarId) {
-            produtoParaEditar = produtos.find(p => p.id == editarId);
-        }
-
-        res.render('admin/produtos', { produtos, categorias, produtoParaEditar });
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao buscar produtos.');
-    }
+    const [produtos] = await db.query(`
+        SELECT p.*, c.nome AS categoria_nome
+        FROM produtos p
+        JOIN categoria_produto c ON p.categoria_id = c.id
+    `);
+    const [categorias] = await db.query('SELECT * FROM categoria_produto');
+    res.render('admin/produtos', { produtos, categorias });
 });
 
-// Adicionar produto
 router.post('/produtos', isAdmin, async (req, res) => {
-    try {
-        const { nome, preco, categoria_id } = req.body;
-        if (!nome || !preco || !categoria_id) return res.status(400).send('Todos os campos são obrigatórios');
-        await db.query('INSERT INTO produtos (nome, preco, categoria_id) VALUES (?, ?, ?)', [nome, preco, categoria_id]);
-        res.redirect('/admin/produtos');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao adicionar produto.');
-    }
+    const { nome, preco, categoria_id } = req.body;
+    if (!nome || !preco || !categoria_id) return res.status(400).send('Todos os campos são obrigatórios');
+    await db.query('INSERT INTO produtos (nome, preco, categoria_id) VALUES (?,?,?)', [nome, preco, categoria_id]);
+    res.redirect('/admin/produtos');
 });
 
-// Atualizar produto
 router.post('/produtos/editar/:id', isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nome, preco, categoria_id } = req.body;
-        await db.query('UPDATE produtos SET nome=?, preco=?, categoria_id=? WHERE id=?', [nome, preco, categoria_id, id]);
-        res.redirect('/admin/produtos');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao atualizar produto.');
-    }
+    const { id } = req.params;
+    const { nome, preco, categoria_id } = req.body;
+    await db.query('UPDATE produtos SET nome=?, preco=?, categoria_id=? WHERE id=?', [nome, preco, categoria_id, id]);
+    res.redirect('/admin/produtos');
 });
 
-// Deletar produto
 router.get('/produtos/deletar/:id', isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        await db.query('DELETE FROM produtos WHERE id=?', [id]);
-        res.redirect('/admin/produtos');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao excluir produto.');
-    }
+    const { id } = req.params;
+    await db.query('DELETE FROM produtos WHERE id=?', [id]);
+    res.redirect('/admin/produtos');
 });
 
-// -------------------------
 // PEDIDOS
-// -------------------------
 router.get('/pedidos', isAdmin, async (req, res) => {
-    try {
-        const sql = `
-            SELECT pe.id, u.nome AS cliente, pe.data_pedido, pe.status, pe.total
-            FROM pedidos pe
-            JOIN usuarios u ON pe.cliente_id = u.id
-            ORDER BY pe.data_pedido DESC
-        `;
-        const [pedidos] = await db.query(sql);
-        res.render('admin/pedidos', { pedidos });
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao buscar pedidos.');
-    }
+    const [pedidos] = await db.query(`
+        SELECT p.id, u.nome AS cliente, p.data_pedido, sp.descricao AS status, fp.descricao AS forma_pagamento
+        FROM pedidos p
+        JOIN usuarios u ON p.usuario_id = u.id
+        JOIN status_pedido sp ON p.status_pedido_id = sp.id
+        JOIN forma_pagamento fp ON p.forma_pagamento_id = fp.id
+        ORDER BY p.data_pedido DESC
+    `);
+    res.render('admin/pedidos', { pedidos });
 });
 
-// Atualizar status do pedido
 router.post('/pedidos/atualizar-status/:id', isAdmin, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-        await db.query('UPDATE pedidos SET status=? WHERE id=?', [status, id]);
-        res.redirect('/admin/pedidos');
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao atualizar status do pedido.');
-    }
+    const { id } = req.params;
+    const { status } = req.body;
+    await db.query('UPDATE pedidos SET status_pedido_id=? WHERE id=?', [status, id]);
+    res.redirect('/admin/pedidos');
 });
 
-// -------------------------
 // RELATÓRIOS
-// -------------------------
 router.get('/relatorios', isAdmin, async (req, res) => {
-    try {
-        const sqlVendas = `
-            SELECT DATE(data_pedido) AS data, SUM(total) AS total_vendas
-            FROM pedidos
-            GROUP BY DATE(data_pedido)
-            ORDER BY DATE(data_pedido) DESC
-        `;
-
-        const sqlStatus = `
-            SELECT status, COUNT(*) AS total
-            FROM pedidos
-            GROUP BY status
-        `;
-
-        const [vendas] = await db.query(sqlVendas);
-        const [status] = await db.query(sqlStatus);
-
-        res.render('admin/relatorios', { vendas, status });
-    } catch (err) {
-        console.error(err);
-        res.send('Erro ao gerar relatórios.');
-    }
+    const [vendas] = await db.query('SELECT DATE(data_pedido) AS data, SUM(total) AS total_vendas FROM pedidos GROUP BY DATE(data_pedido) ORDER BY DATE(data_pedido) DESC');
+    const [status] = await db.query('SELECT status_pedido_id, COUNT(*) AS total FROM pedidos GROUP BY status_pedido_id');
+    res.render('admin/relatorios', { vendas, status });
 });
 
 module.exports = router;
