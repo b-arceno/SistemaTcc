@@ -2,7 +2,7 @@ const db = require('../config/database');
 
 // Página inicial da loja → categorias
 exports.categorias = (req, res) => {
-  db.query('SELECT * FROM categoria_produto', (err, categorias) => {
+  db.query('SELECT id, nome FROM categoria_produto', (err, categorias) => {
     if (err) return res.send('Erro ao carregar categorias');
     res.render('loja/categorias', { categorias, session: req.session });
   });
@@ -10,7 +10,8 @@ exports.categorias = (req, res) => {
 
 // Lista produtos de uma categoria
 exports.produtosPorCategoria = (req, res) => {
-  const categoriaId = req.params.id;
+  const categoriaId = parseInt(req.params.id);
+  if (Number.isNaN(categoriaId)) return res.send('Categoria inválida');
 
   const sql = `
     SELECT p.*, c.nome AS categoria_nome
@@ -37,7 +38,8 @@ exports.produtosPorCategoria = (req, res) => {
 
 // Detalhes de um produto
 exports.detalhesProduto = (req, res) => {
-  const produtoId = req.params.id;
+  const produtoId = parseInt(req.params.id);
+  if (Number.isNaN(produtoId)) return res.send('Produto inválido');
 
   const sql = `
     SELECT p.*, c.nome AS categoria_nome
@@ -67,20 +69,19 @@ exports.verCarrinho = (req, res) => {
 // Adiciona produto ao carrinho
 exports.adicionarAoCarrinho = (req, res) => {
   const { produtoId, nome, preco, quantidade } = req.body;
+  if (!produtoId || !nome || !preco || !quantidade) return res.status(400).send('Dados do produto inválidos');
 
-  if (!req.session.carrinho) {
-    req.session.carrinho = [];
-  }
+  if (!req.session.carrinho) req.session.carrinho = [];
 
   const existente = req.session.carrinho.find(p => p.produtoId == produtoId);
   if (existente) {
-    existente.quantidade += parseInt(quantidade);
+    existente.quantidade += parseInt(quantidade, 10);
   } else {
     req.session.carrinho.push({
       produtoId,
       nome,
       preco: parseFloat(preco),
-      quantidade: parseInt(quantidade)
+      quantidade: parseInt(quantidade, 10)
     });
   }
 
@@ -90,27 +91,20 @@ exports.adicionarAoCarrinho = (req, res) => {
 // Remove item do carrinho
 exports.removerDoCarrinho = (req, res) => {
   const { produtoId } = req.body;
-
-  if (!req.session.carrinho) {
-    req.session.carrinho = [];
-  }
+  if (!req.session.carrinho) req.session.carrinho = [];
 
   req.session.carrinho = req.session.carrinho.filter(p => p.produtoId != produtoId);
-
   res.redirect('/loja/carrinho');
 };
 
 // Atualiza quantidade de item do carrinho
 exports.atualizarCarrinho = (req, res) => {
   const { produtoId, quantidade } = req.body;
-
-  if (!req.session.carrinho) {
-    req.session.carrinho = [];
-  }
+  if (!req.session.carrinho) req.session.carrinho = [];
 
   const item = req.session.carrinho.find(p => p.produtoId == produtoId);
   if (item) {
-    item.quantidade = parseInt(quantidade);
+    item.quantidade = parseInt(quantidade, 10) || item.quantidade;
   }
 
   res.redirect('/loja/carrinho');
@@ -119,81 +113,68 @@ exports.atualizarCarrinho = (req, res) => {
 // Exibe página de checkout
 exports.checkout = (req, res) => {
   const carrinho = req.session.carrinho || [];
+  if (carrinho.length === 0) return res.redirect('/loja/carrinho');
 
-  if (carrinho.length === 0) {
-    return res.redirect('/loja/carrinho');
-  }
-
-  const usuario = req.session.usuario; // dados do cliente logado
-
-  res.render('loja/checkout', {
-    carrinho,
-    usuario,
-    session: req.session
-  });
+  const usuario = req.session.usuario;
+  res.render('loja/checkout', { carrinho, usuario, session: req.session });
 };
 
-// Finaliza o pedido e salva no banco
-exports.finalizarPedido = (req, res) => {
+// Finaliza o pedido e salva no banco (com transação)
+exports.finalizarPedido = async (req, res) => {
   const { forma_pagamento } = req.body;
   const carrinho = req.session.carrinho || [];
   const usuario = req.session.usuario;
 
-  if (!usuario) {
-    return res.redirect('/login'); // força login se não tiver usuário
-  }
+  if (!usuario) return res.redirect('/login');
+  if (!Array.isArray(carrinho) || carrinho.length === 0) return res.redirect('/loja/carrinho');
 
-  if (carrinho.length === 0) {
-    return res.redirect('/loja/carrinho');
-  }
+  let connection;
+  try {
+    // pegar conexão e iniciar transação
+    connection = await db.getConnection();
+    await connection.beginTransaction();
 
-  // Insere pedido na tabela pedidos
-  const sqlPedido = `
-    INSERT INTO pedidos (usuario_id, data_pedido, status_pedido_id, status_pagamento_id, forma_pagamento_id)
-    VALUES (?, NOW(), 1, 1, ?) -- 1 = pedido em andamento, 1 = pagamento pendente
-  `;
+    const sqlPedido = `
+      INSERT INTO pedidos (usuario_id, data_pedido, status_pedido_id, status_pagamento_id, forma_pagamento_id)
+      VALUES (?, NOW(), 1, 1, ?)
+    `;
+    const [pedidoResult] = await connection.query(sqlPedido, [usuario.id, forma_pagamento || null]);
+    const pedidoId = pedidoResult.insertId;
 
-  db.query(sqlPedido, [usuario.id, forma_pagamento], (err, resultado) => {
-    if (err) {
-      console.error("Erro ao salvar pedido:", err);
-      return res.send('Erro ao salvar pedido');
-    }
-
-    const pedidoId = resultado.insertId;
-
-    // Insere itens do pedido
     const sqlItens = `
       INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario)
       VALUES ?
     `;
-
     const valores = carrinho.map(p => [
       pedidoId,
-      p.produtoId,
-      p.quantidade,
-      p.preco
+      parseInt(p.produtoId, 10),
+      parseInt(p.quantidade, 10),
+      parseFloat(p.preco)
     ]);
 
-    db.query(sqlItens, [valores], (err2) => {
-      if (err2) {
-        console.error("Erro ao salvar itens:", err2);
-        return res.send('Erro ao salvar itens');
-      }
+    if (valores.length > 0) {
+      await connection.query(sqlItens, [valores]);
+    }
 
-      // Limpa carrinho da sessão
-      req.session.carrinho = [];
-
-      res.redirect('/loja/pedidos');
-    });
-  });
+    // commit e liberação
+    await connection.commit();
+    req.session.carrinho = [];
+    res.redirect('/loja/pedidos');
+  } catch (err) {
+    if (connection) {
+      try { await connection.rollback(); } catch (_) {}
+    }
+    console.error('Erro ao finalizar pedido:', err);
+    res.status(500).send('Erro ao finalizar pedido');
+  } finally {
+    if (connection) connection.release();
+  }
 };
 
 // Lista pedidos do cliente logado
 exports.meusPedidos = (req, res) => {
   const usuario = req.session.usuario;
-  if (!usuario) {
-    return res.redirect('/login');
-  }
+  if (!usuario) return res.redirect('/login');
 
   const sql = `
     SELECT p.id, p.data_pedido, 

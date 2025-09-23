@@ -17,21 +17,22 @@ exports.vendasPorPeriodo = async (req, res) => {
     }
 
     const dados = await Relatorio.vendasPorPeriodo(inicio, fim);
-    // retornar JSON já pronto para front
     res.json({ inicio, fim, resultado: dados });
   } catch (err) {
     console.error('Erro gerar relatório vendasPorPeriodo:', err);
-    res.status(500).json({ error: 'Erro ao gerar relatório' });
+    res.status(500).json({ error: 'Erro ao gerar relatório', detail: err.message });
   }
 };
 
 exports.pedidosPorCliente = async (req, res) => {
   try {
-    const clienteId = req.params.clienteId;
+    const clienteId = parseInt(req.params.clienteId);
+    if (Number.isNaN(clienteId)) return res.status(400).json({ error: 'clienteId inválido' });
+
     const dados = await Relatorio.pedidosPorCliente(clienteId);
     res.json({ clienteId, pedidos: dados });
   } catch (err) {
     console.error('Erro gerar relatório pedidosPorCliente:', err);
-    res.status(500).json({ error: 'Erro ao gerar relatório' });
+    res.status(500).json({ error: 'Erro ao gerar relatório', detail: err.message });
   }
 };

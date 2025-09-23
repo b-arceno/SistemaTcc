@@ -1,48 +1,57 @@
+// app.js
 const express = require('express');
-const router = express.Router();
-const db = require('../config/database'); // promise
-const bcrypt = require('bcrypt'); // se tiver senha criptografada
+const path = require('path');
+const session = require('express-session');
 
-// Página de login
-router.get('/login', (req, res) => {
-  res.render('login'); // cria views/login.ejs
+// Corrigido: caminho correto para o database.js
+const db = require('./config/database');
+
+// Routers
+const authRoutes = require('./routes/index'); // login, registro, senha, reset
+const lojaRoutes = require('./routes/lojaRoutes'); // dashboard da loja / admin
+
+const app = express();
+const port = 3000;
+
+// Configurações do Express
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Configuração da sessão
+app.use(session({
+    secret: 'sua_chave_secreta', // substitua por uma string forte
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Middleware para verificar se usuário está logado
+app.use((req, res, next) => {
+    res.locals.usuario = req.session.usuario || null;
+    next();
 });
 
-// Autenticar login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, senha } = req.body;
-    const [usuarios] = await db.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+// Rotas
+app.use('/', authRoutes);
+app.use('/loja', lojaRoutes);
 
-    if (usuarios.length === 0) return res.send("Usuário não encontrado");
-
-    const usuario = usuarios[0];
-
-    // Se a senha estiver criptografada
-    // const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
-    // if (!senhaCorreta) return res.send("Senha incorreta");
-
-    // Se não estiver criptografada, só compara direto:
-    if (usuario.senha !== senha) return res.send("Senha incorreta");
-
-    // Salva usuário na sessão
-    req.session.usuario = {
-      id: usuario.id,
-      nome: usuario.nome,
-      tipo_usuario_id: usuario.tipo_usuario_id
-    };
-
-    res.redirect('/loja');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Erro ao fazer login");
-  }
+// Página inicial
+app.get('/', (req, res) => {
+    if (req.session.usuario) {
+        res.redirect('/loja');
+    } else {
+        res.redirect('/login');
+    }
 });
 
-// Logout
-router.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/login');
+// Erro 404
+app.use((req, res, next) => {
+    res.status(404).render('404');
 });
 
-module.exports = router;
+// Inicia o servidor
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+});

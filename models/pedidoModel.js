@@ -1,18 +1,19 @@
-const db = require('../config/db');
+const db = require('../config/database');
 
 exports.getAll = (cb) => {
   const sql = `
     SELECT ped.*, c.nome AS cliente_nome
     FROM pedidos ped
     LEFT JOIN clientes c ON ped.cliente_id = c.id
-    ORDER BY ped.id DESC`;
+    ORDER BY ped.id DESC
+  `;
   db.query(sql, cb);
 };
 
 exports.getById = (id, cb) => db.query('SELECT * FROM pedidos WHERE id=?', [id], cb);
 
 exports.create = (pedido, cb) => {
-  const sql = 'INSERT INTO pedidos (cliente_id, status, total) VALUES (?,?,?)';
+  const sql = 'INSERT INTO pedidos (cliente_id, status, total) VALUES (?, ?, ?)';
   db.query(sql, [pedido.cliente_id, pedido.status, pedido.total], cb);
 };
 

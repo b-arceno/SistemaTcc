@@ -7,7 +7,7 @@ Relatorio.vendasPorPeriodo = (inicio, fim) => new Promise((resolve, reject) => {
   const sql = `
     SELECT p.id, p.nome,
       SUM(ip.quantidade) AS total_vendido,
-      SUM(ip.quantidade * ip.preco_unit) AS receita
+      SUM(ip.quantidade * ip.preco_unitario) AS receita
     FROM pedidos ped
     JOIN itens_pedido ip ON ped.id = ip.pedido_id
     JOIN produtos p ON ip.produto_id = p.id
