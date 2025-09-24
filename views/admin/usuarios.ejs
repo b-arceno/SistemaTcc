@@ -1,0 +1,31 @@
+<%- include('../partials/adminHeader', { titulo: 'Usuários' }) %>
+
+<h1>Gerenciar Usuários</h1>
+
+<table class="tabela-admin">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nome</th>
+      <th>Email</th>
+      <th>Tipo</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% usuarios.forEach(u => { %>
+      <tr>
+        <td><%= u.id %></td>
+        <td><%= u.nome %></td>
+        <td><%= u.email %></td>
+        <td><%= u.tipo_usuario_id === 1 ? 'Admin' : 'Cliente' %></td>
+        <td>
+          <a href="/admin/usuarios/editar/<%= u.id %>" class="btn">Editar</a>
+          <a href="/admin/usuarios/deletar/<%= u.id %>" class="btn">Excluir</a>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/adminFooter') %>

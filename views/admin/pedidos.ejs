@@ -1,57 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Pedidos - Painel Admin</title>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px; }
-    h1 { color: #4B0082; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #4B0082; color: white; }
-    button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
-    .update-btn { background-color: #28a745; color: white; }
-  </style>
-</head>
-<body>
-  <h1>Pedidos</h1>
+<%- include('../partials/adminHeader', { titulo: 'Pedidos' }) %>
 
-  <table>
-    <thead>
+<h1>Gerenciar Pedidos</h1>
+
+<table class="tabela-admin">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Cliente</th>
+      <th>Status</th>
+      <th>Total</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% pedidos.forEach(p => { %>
       <tr>
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Data</th>
-        <th>Status Pedido</th>
-        <th>Status Pagamento</th>
-        <th>Forma Pagamento</th>
-        <th>Total</th>
-        <th>Ações</th>
+        <td><%= p.id %></td>
+        <td><%= p.cliente %></td>
+        <td><%= p.status %></td>
+        <td>R$ <%= p.total.toFixed(2) %></td>
+        <td>
+          <a href="/admin/pedidos/<%= p.id %>" class="btn">Ver</a>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      <% pedidos.forEach(p => { %>
-        <tr>
-          <td><%= p.id %></td>
-          <td><%= p.cliente %></td>
-          <td><%= new Date(p.data_pedido).toLocaleString() %></td>
-          <td><%= p.status_pedido %></td>
-          <td><%= p.status_pagamento %></td>
-          <td><%= p.forma_pagamento %></td>
-          <td>R$ <%= Number(p.total).toFixed(2) %></td>
-          <td>
-            <form action="/admin/pedidos/atualizar-status/<%= p.id %>" method="POST">
-              <select name="status_pedido_id" required>
-                <option value="1" <%= p.status_pedido == 'Pendente' ? 'selected' : '' %>>Pendente</option>
-                <option value="2" <%= p.status_pedido == 'Em andamento' ? 'selected' : '' %>>Em andamento</option>
-                <option value="3" <%= p.status_pedido == 'Concluído' ? 'selected' : '' %>>Concluído</option>
-              </select>
-              <button class="update-btn" type="submit">Atualizar</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</body>
-</html>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/adminFooter') %>

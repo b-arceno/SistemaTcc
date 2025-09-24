@@ -2,23 +2,24 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Loja — Categorias</title>
+  <title>Categorias</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <%- include('../partials/header') %>
 
-  <h1 class="titulo-categoria">Escolha uma categoria</h1>
+  <main class="container">
+    <h1 class="page-title">Categorias</h1>
+    <div class="grid">
+      <% categorias.forEach(cat => { %>
+        <div class="card categoria-card">
+          <h2><%= cat.nome %></h2>
+          <a href="/loja/categorias/<%= cat.id %>" class="btn">Ver Produtos</a>
+        </div>
+      <% }) %>
+    </div>
+  </main>
 
-  <div class="categorias-container">
-    <% categorias.forEach(c => { %>
-      <a href="/loja/categoria/<%= c.id %>" class="categoria-card">
-        <div class="card-imagem"></div>
-        <p><%= c.nome %></p>
-      </a>
-    <% }) %>
-  </div>
   <%- include('../partials/footer') %>
-
 </body>
 </html>

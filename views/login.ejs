@@ -24,8 +24,9 @@
         <a href="/registro" class="tab">Registrar</a>
       </div>
 
-      <% if (erro) { %>
-        <p style="color: red; font-weight: bold;"><%= erro %></p>
+      <% const erroMsg = typeof erro !== 'undefined' ? erro : null; %>
+      <% if (erroMsg) { %>
+        <p style="color: red; font-weight: bold;"><%= erroMsg %></p>
       <% } %>
 
       <form action="/login" method="POST" class="formulario">

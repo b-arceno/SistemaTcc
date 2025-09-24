@@ -5,6 +5,7 @@ const db = require('./config/database');
 
 const authRoutes = require('./routes/index');
 const lojaRoutes = require('./routes/lojaRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // <-- importa adminRoutes
 
 const app = express();
 const port = 3000;
@@ -21,22 +22,32 @@ app.use(session({
     saveUninitialized: true
 }));
 
+// Disponibiliza usuário logado nas views
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario || null;
     next();
 });
 
+// Rotas
 app.use('/', authRoutes);
 app.use('/loja', lojaRoutes);
+app.use('/admin', adminRoutes); // <-- adiciona rotas de admin
 
+// Redirecionamento padrão
 app.get('/', (req, res) => {
     if (req.session.usuario) {
-        res.redirect('/loja');
+        // Se for admin, joga para painel admin
+        if (req.session.usuario.tipo_usuario_id === 1) {
+            return res.redirect('/admin');
+        }
+        // Se for cliente, joga para loja
+        return res.redirect('/loja');
     } else {
-        res.redirect('/login');
+        return res.redirect('/login');
     }
 });
 
+// 404
 app.use((req, res) => {
     res.status(404).render('404');
 });

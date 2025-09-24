@@ -2,25 +2,26 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title><%= categoriaNome %></title>
+  <title>Produtos</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <%- include('../partials/header') %>
 
-<%- include('../partials/header') %>
+  <main class="container">
+    <h1 class="page-title">Nossos Produtos</h1>
+    <div class="grid">
+      <% produtos.forEach(produto => { %>
+        <div class="card produto-card">
+          <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" />
+          <h2><%= produto.nome %></h2>
+          <p class="price">R$ <%= produto.preco.toFixed(2) %></p>
+          <a href="/loja/produtos/<%= produto.id %>" class="btn">Ver Detalhes</a>
+        </div>
+      <% }) %>
+    </div>
+  </main>
 
-  <h1 class="titulo-categoria"><%= categoriaNome.toUpperCase() %></h1>
-
-  <div class="produtos-container">
-    <% produtos.forEach(p => { %>
-      <a href="/loja/produto/<%= p.id %>" class="produto-card">
-        <img src="/imagens/<%= p.imagem %>" alt="<%= p.nome %>" />
-        <p><%= p.nome %></p>
-        <strong>R$ <%= p.preco.toFixed(2) %></strong>
-      </a>
-    <% }) %>
-  </div>
   <%- include('../partials/footer') %>
-
 </body>
 </html>

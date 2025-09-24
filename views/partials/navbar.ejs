@@ -3,18 +3,18 @@
     <a href="/loja" class="logo">TiaLuDoces</a>
     <a href="/loja" class="nav-link">Produtos</a>
 
-    <% if (session.usuario) { %>
+    <% if (usuario) { %>
       <a href="/loja/pedidos" class="nav-link">Meus Pedidos</a>
     <% } %>
 
-    <% if (session.usuario && session.usuario.tipo_usuario_id === 1) { %>
+    <% if (usuario && usuario.tipo_usuario_id === 1) { %>
       <a href="/admin" class="nav-link">Admin</a>
     <% } %>
   </div>
 
   <div class="navbar-right">
-    <% if (session.usuario) { %>
-      <span class="nav-user">Olá, <%= session.usuario.nome %></span>
+    <% if (usuario) { %>
+      <span class="nav-user">Olá, <%= usuario.nome %></span>
       <a href="/logout" title="Sair" class="nav-icon">
         <i class="fa-solid fa-right-from-bracket"></i>
       </a>

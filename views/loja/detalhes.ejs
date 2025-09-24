@@ -2,52 +2,29 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title><%= produto.nome %> | Confeitaria</title>
+  <title><%= produto.nome %></title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+  <%- include('../partials/header') %>
 
-<%- include('../partials/header') %>
-
-  <div class="produto-detalhes">
-    <div class="imagem-grande">
-      <% if (produto.imagem) { %>
-        <img src="/imagens/<%= produto.imagem %>" alt="<%= produto.nome %>" />
-      <% } else { %>
-        <p>Imagem indisponível</p>
-      <% } %>
+  <main class="container produto-detalhe">
+    <div class="produto-imagem">
+      <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" />
     </div>
-
-    <div class="info">
-      <h2><%= produto.nome %></h2>
-      <p class="preco">R$ <%= (produto.preco || 0).toFixed(2) %></p>
+    <div class="produto-info">
+      <h1><%= produto.nome %></h1>
+      <p class="price">R$ <%= produto.preco.toFixed(2) %></p>
       <p><%= produto.descricao %></p>
-
       <form action="/loja/carrinho/adicionar" method="POST">
-        <input type="hidden" name="produtoId" value="<%= produto.id %>" />
-        <input type="hidden" name="nome" value="<%= produto.nome %>" />
-        <input type="hidden" name="preco" value="<%= produto.preco %>" />
-
+        <input type="hidden" name="produtoId" value="<%= produto.id %>">
         <label>Quantidade:</label>
-        <div class="quantidade">
-          <button type="button" onclick="alterar(-1)">-</button>
-          <input type="number" id="quantidade" name="quantidade" value="1" min="1" />
-          <button type="button" onclick="alterar(1)">+</button>
-        </div>
-
-        <button type="submit" class="adicionar">Adicionar ao carrinho 🛒</button>
+        <input type="number" name="quantidade" value="1" min="1" />
+        <button type="submit" class="btn">Adicionar ao Carrinho</button>
       </form>
     </div>
-  </div>
-  <%- include('../partials/footer') %>\
-  <script>
-    function alterar(valor) {
-      const input = document.getElementById('quantidade');
-      let atual = parseInt(input.value);
-      if (!isNaN(atual) && atual + valor >= 1) {
-        input.value = atual + valor;
-      }
-    }
-  </script>
+  </main>
+
+  <%- include('../partials/footer') %>
 </body>
 </html>

@@ -1,0 +1,18 @@
+<div class="navbar-admin">
+  <div class="navbar-left">
+    <a href="/admin" class="logo">TiaLuDoces Admin</a>
+    <a href="/admin/produtos" class="nav-link">Produtos</a>
+    <a href="/admin/categorias" class="nav-link">Categorias</a>
+    <a href="/admin/pedidos" class="nav-link">Pedidos</a>
+    <a href="/admin/relatorios" class="nav-link">Relatórios</a>
+    <a href="/admin/usuarios" class="nav-link">Usuários</a>
+  </div>
+  <div class="navbar-right">
+    <% if (usuario) { %>
+      <span class="nav-user">Olá, <%= usuario.nome %></span>
+      <a href="/logout" title="Sair" class="nav-icon">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </a>
+    <% } %>
+  </div>
+</div>

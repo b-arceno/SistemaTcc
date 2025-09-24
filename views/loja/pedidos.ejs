@@ -11,59 +11,29 @@
   <main class="container">
     <h1 class="page-title">📦 Meus Pedidos</h1>
 
-    <% if (!pedidos || pedidos.length === 0) { %>
-      <p class="mensagem-vazia">Você ainda não fez nenhum pedido.</p>
-    <% } else { %>
+    <% if (pedidos && pedidos.length > 0) { %>
       <table class="tabela-pedidos">
         <thead>
           <tr>
             <th>ID</th>
             <th>Data</th>
-            <th>Status Pedido</th>
-            <th>Status Pagamento</th>
-            <th>Forma de Pagamento</th>
+            <th>Status</th>
+            <th>Total</th>
           </tr>
         </thead>
         <tbody>
-          <% pedidos.forEach(p => { %>
+          <% pedidos.forEach(pedido => { %>
             <tr>
-              <td><%= p.id %></td>
-              <td><%= new Date(p.data_pedido).toLocaleString('pt-BR') %></td>
-              <td><span class="badge <%= p.status_pedido %>"><%= p.status_pedido %></span></td>
-              <td><%= p.status_pagamento %></td>
-              <td><%= p.forma_pagamento %></td>
+              <td><%= pedido.id %></td>
+              <td><%= pedido.data %></td>
+              <td><span class="status <%= pedido.status %>"><%= pedido.status %></span></td>
+              <td>R$ <%= pedido.total.toFixed(2) %></td>
             </tr>
-
-            <!-- Itens do pedido -->
-            <% if (p.itens && p.itens.length > 0) { %>
-              <tr class="linha-itens">
-                <td colspan="5">
-                  <table class="tabela-itens">
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Quantidade</th>
-                        <th>Preço Unitário</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% p.itens.forEach(item => { %>
-                        <tr>
-                          <td><%= item.nome %></td>
-                          <td><%= item.quantidade %></td>
-                          <td>R$ <%= item.preco.toFixed(2) %></td>
-                          <td>R$ <%= (item.quantidade * item.preco).toFixed(2) %></td>
-                        </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            <% } %>
           <% }) %>
         </tbody>
       </table>
+    <% } else { %>
+      <p class="mensagem-vazia">Você ainda não fez nenhum pedido.</p>
     <% } %>
   </main>
 

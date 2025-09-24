@@ -1,64 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Painel Admin</title>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px; }
-    h1 { color: #4B0082; margin-bottom: 20px; }
-    .welcome { margin-bottom: 30px; font-size: 18px; }
-    .dashboard { display: flex; gap: 20px; flex-wrap: wrap; }
-    .card {
-      background-color: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      text-align: center;
-      width: 200px;
-      transition: transform 0.2s;
-    }
-    .card:hover { transform: scale(1.05); }
-    .card a {
-      display: block;
-      margin-top: 10px;
-      padding: 10px 0;
-      background-color: #4B0082;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    .logout { margin-top: 40px; display: inline-block; background-color: #dc3545; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Admin TiaLuDoces</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <%- include('partials/adminHeader') %>
 
-  <h1>Painel Admin</h1>
-  <p class="welcome">Bem-vindo, <%= usuario.nome %>!</p>
+  <div class="admin-container">
+    <h1>Dashboard</h1>
+    <h2>Pedidos recentes</h2>
 
-  <div class="dashboard">
-    <div class="card">
-      <h2>Categorias</h2>
-      <a href="/admin/categorias">Gerenciar</a>
-    </div>
-
-    <div class="card">
-      <h2>Produtos</h2>
-      <a href="/admin/produtos">Gerenciar</a>
-    </div>
-
-    <div class="card">
-      <h2>Pedidos</h2>
-      <a href="/admin/pedidos">Gerenciar</a>
-    </div>
-
-    <div class="card">
-      <h2>Relatórios</h2>
-      <a href="/admin/relatorios">Visualizar</a>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Data</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% pedidos.forEach(pedido => { %>
+          <tr>
+            <td><%= pedido.id %></td>
+            <td><%= pedido.cliente %></td>
+            <td><%= pedido.data_pedido %></td>
+            <td><%= pedido.status %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
 
-  <a class="logout" href="/logout">Sair</a>
-
+  <%- include('partials/adminFooter') %>
 </body>
 </html>
