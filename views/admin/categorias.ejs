@@ -5,29 +5,19 @@
 <form class="form-categoria" action="/admin/categorias" method="POST">
   <label for="nome">Nome da Categoria</label>
   <input type="text" id="nome" name="nome" required>
-  <button type="submit" class="btn">Cadastrar</button>
+  <button type="submit" class="btn btn-cadastrar">Cadastrar</button>
 </form>
 
-<table class="tabela-admin">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Nome</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% categorias.forEach(c => { %>
-      <tr>
-        <td><%= c.id %></td>
-        <td><%= c.nome %></td>
-        <td>
-          <a href="/admin/categorias/editar/<%= c.id %>" class="btn">Editar</a>
-          <a href="/admin/categorias/deletar/<%= c.id %>" class="btn">Excluir</a>
-        </td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<div class="categorias-container">
+  <% categorias.forEach(c => { %>
+    <div class="categoria-card">
+      <h3><%= c.nome %></h3>
+      <div class="card-btns">
+        <a href="/admin/categorias/editar/<%= c.id %>" class="btn btn-editar">Editar</a>
+        <a href="/admin/categorias/deletar/<%= c.id %>" class="btn btn-deletar">Excluir</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
 
 <%- include('../partials/adminFooter') %>

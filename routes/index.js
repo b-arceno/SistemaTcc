@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database');
+const db = require('../config/database'); // mysql2/promise
 const bcrypt = require('bcrypt');
 
 // GET página inicial
@@ -14,18 +14,16 @@ router.get('/login', (req, res) => {
 });
 
 // POST Login
-router.post('/login', (req, res) => {
-    const { email, senha } = req.body;
+router.post('/login', async (req, res) => {
+    try {
+        const { email, senha } = req.body;
 
-    if (!email || !senha) {
-        return res.render('login', { erro: 'Preencha todos os campos!' });
-    }
-
-    db.query('SELECT * FROM usuarios WHERE email=?', [email], async (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.render('login', { erro: 'Erro no servidor!' });
+        if (!email || !senha) {
+            return res.render('login', { erro: 'Preencha todos os campos!' });
         }
+
+        const [results] = await db.query('SELECT * FROM usuarios WHERE email=?', [email]);
+
         if (results.length === 0) {
             return res.render('login', { erro: 'Usuário não encontrado!' });
         }
@@ -41,11 +39,15 @@ router.post('/login', (req, res) => {
         req.session.usuario = usuario;
 
         if (usuario.tipo_usuario_id === 1) {
-            res.redirect('/admin');
+            return res.redirect('/admin');
         } else {
-            res.redirect('/loja');
+            return res.redirect('/loja');
         }
-    });
+
+    } catch (err) {
+        console.error('Erro no login:', err);
+        res.render('login', { erro: 'Erro no servidor!' });
+    }
 });
 
 // GET Registro
@@ -55,25 +57,26 @@ router.get('/registro', (req, res) => {
 
 // POST Registro
 router.post('/registro', async (req, res) => {
-    const { nome, email, telefone, senha } = req.body;
+    try {
+        const { nome, email, telefone, senha } = req.body;
 
-    if (!nome || !email || !telefone || !senha) {
-        return res.render('registro', { erro: "Preencha todos os campos!", sucesso: null });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    db.query(
-        "INSERT INTO usuarios (nome, email, telefone, senha, tipo_usuario_id) VALUES (?, ?, ?, ?, ?)",
-        [nome, email, telefone, senhaHash, 2], // 2 = cliente
-        (err) => {
-            if (err) {
-                console.error(err);
-                return res.render('registro', { erro: "Erro ao cadastrar. Tente novamente.", sucesso: null });
-            }
-            res.render('registro', { erro: null, sucesso: "Cadastro realizado com sucesso! Agora faça login." });
+        if (!nome || !email || !telefone || !senha) {
+            return res.render('registro', { erro: "Preencha todos os campos!", sucesso: null });
         }
-    );
+
+        const senhaHash = await bcrypt.hash(senha, 10);
+
+        await db.query(
+            "INSERT INTO usuarios (nome, email, telefone, senha, tipo_usuario_id) VALUES (?, ?, ?, ?, ?)",
+            [nome, email, telefone, senhaHash, 2] // 2 = cliente
+        );
+
+        res.render('registro', { erro: null, sucesso: "Cadastro realizado com sucesso! Agora faça login." });
+
+    } catch (err) {
+        console.error('Erro ao cadastrar usuário:', err);
+        res.render('registro', { erro: "Erro ao cadastrar. Tente novamente.", sucesso: null });
+    }
 });
 
 // GET Logout
@@ -88,41 +91,50 @@ router.get('/esqueceu-senha', (req, res) => {
     res.render('senha', { mensagem: null, token: null });
 });
 
-// POST Enviar e-mail de recuperação (simples)
-router.post('/esqueceu-senha', (req, res) => {
-    const { email } = req.body;
+// POST Enviar e-mail de recuperação (simulação)
+router.post('/esqueceu-senha', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const [results] = await db.query('SELECT * FROM usuarios WHERE email=?', [email]);
 
-    db.query('SELECT * FROM usuarios WHERE email=?', [email], (err, results) => {
-        if (err || results.length === 0) {
+        if (results.length === 0) {
             return res.render('senha', { mensagem: "E-mail não encontrado!", token: null });
         }
 
-        // Aqui você pode gerar token e mandar e-mail.
-        // Por enquanto, simulação:
+        // Simulação de envio de token
         res.render('senha', { mensagem: "Um link de recuperação foi enviado para seu e-mail.", token: null });
-    });
+
+    } catch (err) {
+        console.error(err);
+        res.render('senha', { mensagem: "Erro no servidor!", token: null });
+    }
 });
 
-// GET Resetar senha (simulado)
+// GET Resetar senha (simulação)
 router.get('/reset/:token', (req, res) => {
     const { token } = req.params;
     res.render('senha', { mensagem: null, token });
 });
 
-// POST Resetar senha (simulado)
+// POST Resetar senha (simulação)
 router.post('/reset/:token', async (req, res) => {
-    const { token } = req.params;
-    const { senha, confirma } = req.body;
+    try {
+        const { token } = req.params;
+        const { senha, confirma } = req.body;
 
-    if (senha !== confirma) {
-        return res.render('senha', { mensagem: "As senhas não conferem!", token });
+        if (senha !== confirma) {
+            return res.render('senha', { mensagem: "As senhas não conferem!", token });
+        }
+
+        const senhaHash = await bcrypt.hash(senha, 10);
+
+        // Aqui você faria o update real no banco com base no token
+        res.render('senha', { mensagem: "Senha redefinida com sucesso! Faça login.", token: null });
+
+    } catch (err) {
+        console.error(err);
+        res.render('senha', { mensagem: "Erro ao redefinir senha!", token });
     }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    // Aqui você faria um update real com base no token e usuário relacionado
-    // Simulação:
-    res.render('senha', { mensagem: "Senha redefinida com sucesso! Faça login.", token: null });
 });
 
 module.exports = router;

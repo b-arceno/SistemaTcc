@@ -9,16 +9,38 @@
   <%- include('../partials/header') %>
 
   <main class="container">
-    <h1 class="page-title">Nossos Produtos</h1>
+    <h1 class="page-title">Produtos</h1>
+
     <div class="grid">
       <% produtos.forEach(produto => { %>
         <div class="card produto-card">
-          <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" />
+          <img src="/uploads/<%= produto.imagem ? produto.imagem : 'sem-imagem.png' %>" alt="<%= produto.nome %>">
           <h2><%= produto.nome %></h2>
-          <p class="price">R$ <%= produto.preco.toFixed(2) %></p>
+          <p class="price">R$ <%= (produto.preco ? Number(produto.preco).toFixed(2) : '0.00') %></p>
           <a href="/loja/produtos/<%= produto.id %>" class="btn">Ver Detalhes</a>
         </div>
       <% }) %>
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    <div class="pagination">
+      <% if (page > 1) { %>
+        <% if (categoriaId) { %>
+          <a href="/loja/categorias/<%= categoriaId %>?page=<%= page - 1 %>" class="btn">« Anterior</a>
+        <% } else { %>
+          <a href="/loja/produtos?page=<%= page - 1 %>" class="btn">« Anterior</a>
+        <% } %>
+      <% } %>
+
+      <span>Página <%= page %></span>
+
+      <% if (produtos.length === 10) { %>
+        <% if (categoriaId) { %>
+          <a href="/loja/categorias/<%= categoriaId %>?page=<%= page + 1 %>" class="btn">Próxima »</a>
+        <% } else { %>
+          <a href="/loja/produtos?page=<%= page + 1 %>" class="btn">Próxima »</a>
+        <% } %>
+      <% } %>
     </div>
   </main>
 

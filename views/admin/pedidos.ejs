@@ -7,8 +7,9 @@
     <tr>
       <th>ID</th>
       <th>Cliente</th>
+      <th>Data</th>
       <th>Status</th>
-      <th>Total</th>
+      <th>Pagamento</th>
       <th>Ações</th>
     </tr>
   </thead>
@@ -17,10 +18,11 @@
       <tr>
         <td><%= p.id %></td>
         <td><%= p.cliente %></td>
+        <td><%= new Date(p.data_pedido).toLocaleDateString() %></td>
         <td><%= p.status %></td>
-        <td>R$ <%= p.total.toFixed(2) %></td>
+        <td><%= p.forma_pagamento %></td>
         <td>
-          <a href="/admin/pedidos/<%= p.id %>" class="btn">Ver</a>
+          <a href="/admin/pedidos/visualizar/<%= p.id %>" class="btn btn-editar">Ver</a>
         </td>
       </tr>
     <% }) %>

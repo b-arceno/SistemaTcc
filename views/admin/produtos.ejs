@@ -22,7 +22,7 @@
   <label for="descricao">Descrição</label>
   <textarea id="descricao" name="descricao"></textarea>
 
-  <button type="submit" class="btn">Cadastrar Produto</button>
+  <button type="submit" class="btn btn-cadastrar">Cadastrar Produto</button>
 </form>
 
 <div class="produtos-container">
@@ -30,9 +30,11 @@
     <div class="produto-card">
       <img src="/uploads/<%= p.imagem %>" alt="<%= p.nome %>">
       <h3><%= p.nome %></h3>
-      <p>R$ <%= p.preco.toFixed(2) %></p>
-      <a href="/admin/produtos/editar/<%= p.id %>" class="btn">Editar</a>
-      <a href="/admin/produtos/deletar/<%= p.id %>" class="btn">Excluir</a>
+      <p>R$ <%= Number(p.preco).toFixed(2) %></p>
+      <div class="card-btns">
+        <a href="/admin/produtos/editar/<%= p.id %>" class="btn btn-editar">Editar</a>
+        <a href="/admin/produtos/deletar/<%= p.id %>" class="btn btn-deletar">Excluir</a>
+      </div>
     </div>
   <% }) %>
 </div>

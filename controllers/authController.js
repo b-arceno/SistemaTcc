@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt'); // se quiser usar senha criptografada
+const bcrypt = require('bcrypt'); // senha criptografada
 const db = require('../config/database');
 
 // LOGIN

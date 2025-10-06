@@ -1,73 +1,45 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Relatórios - Painel Admin</title>
-  <link rel="stylesheet" href="/css/admin.css">
-</head>
-<body>
-  <div class="admin-container">
-    
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2>Painel Admin</h2>
-      <ul>
-        <li><a href="/admin/dashboard">Dashboard</a></li>
-        <li><a href="/admin/categorias">Categorias</a></li>
-        <li><a href="/admin/produtos">Produtos</a></li>
-        <li><a href="/admin/pedidos">Pedidos</a></li>
-        <li><a href="/admin/relatorios">Relatórios</a></li>
-        <li><a href="/logout">Sair</a></li>
-      </ul>
-    </aside>
+<%- include('../partials/adminHeader', { titulo: 'Relatórios' }) %>
 
-    <!-- Conteúdo -->
-    <main class="content">
-      <h1>Relatórios</h1>
+<h1>Relatórios</h1>
 
-      <!-- Vendas por Dia -->
-      <section>
-        <h2>Total de Vendas por Dia</h2>
-        <table class="tabela-admin">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Total Vendas</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% vendas.forEach(v => { %>
-              <tr>
-                <td><%= new Date(v.data).toLocaleDateString() %></td>
-                <td>R$ <%= Number(v.total_vendas).toFixed(2) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </section>
+<section>
+  <h2>Total de Vendas por Dia</h2>
+  <table class="tabela-admin">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Total Vendas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% vendas.forEach(v => { %>
+        <tr>
+          <td><%= new Date(v.data).toLocaleDateString() %></td>
+          <td>R$ <%= Number(v.total_vendas).toFixed(2) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
 
-      <!-- Pedidos por Status -->
-      <section>
-        <h2>Pedidos por Status</h2>
-        <table class="tabela-admin">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Total de Pedidos</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% status.forEach(s => { %>
-              <tr>
-                <td><%= s.status %></td>
-                <td><%= s.total %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </section>
+<section>
+  <h2>Pedidos por Status</h2>
+  <table class="tabela-admin">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Total de Pedidos</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% status.forEach(s => { %>
+        <tr>
+          <td><%= s.descricao %></td>
+          <td><%= s.total %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
 
-    </main>
-  </div>
-</body>
-</html>
+<%- include('../partials/adminFooter') %>

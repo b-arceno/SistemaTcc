@@ -1,40 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard - Admin TiaLuDoces</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <%- include('partials/adminHeader') %>
+<%- include('../partials/adminHeader', { titulo: 'Dashboard' }) %>
 
-  <div class="admin-container">
-    <h1>Dashboard</h1>
-    <h2>Pedidos recentes</h2>
+<h1>Bem-vindo, <%= usuario.nome %>!</h1>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Data</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% pedidos.forEach(pedido => { %>
-          <tr>
-            <td><%= pedido.id %></td>
-            <td><%= pedido.cliente %></td>
-            <td><%= pedido.data_pedido %></td>
-            <td><%= pedido.status %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+<section class="painel-admin">
+  <div class="painel-card">
+    <i class="fas fa-box"></i>
+    <h2>Pedidos Recentes</h2>
+    <p><%= pedidos.length %> pedidos nos últimos registros</p>
+    <a href="/admin/pedidos" class="btn">Ver Todos</a>
   </div>
+</section>
 
-  <%- include('partials/adminFooter') %>
-</body>
-</html>
+<%- include('../partials/adminFooter') %>
