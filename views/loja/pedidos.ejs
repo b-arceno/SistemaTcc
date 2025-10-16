@@ -9,7 +9,7 @@
   <%- include('../partials/header') %>
 
   <main class="container">
-    <h1 class="page-title">📦 Meus Pedidos</h1>
+    <h1 class="page-title">Meus Pedidos</h1>
 
     <% if (pedidos && pedidos.length > 0) { %>
       <table class="tabela-pedidos">
@@ -27,7 +27,7 @@
               <td><%= pedido.id %></td>
               <td><%= pedido.data %></td>
               <td><span class="status <%= pedido.status %>"><%= pedido.status %></span></td>
-              <td>R$ <%= pedido.total.toFixed(2) %></td>
+              <td>R$ <%= Number(pedido.total).toFixed(2) %></td>
             </tr>
           <% }) %>
         </tbody>

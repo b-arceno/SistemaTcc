@@ -22,26 +22,6 @@
       <% }) %>
     </div>
 
-    <!-- PAGINAÇÃO -->
-    <div class="pagination">
-      <% if (page > 1) { %>
-        <% if (categoriaId) { %>
-          <a href="/loja/categorias/<%= categoriaId %>?page=<%= page - 1 %>" class="btn">« Anterior</a>
-        <% } else { %>
-          <a href="/loja/produtos?page=<%= page - 1 %>" class="btn">« Anterior</a>
-        <% } %>
-      <% } %>
-
-      <span>Página <%= page %></span>
-
-      <% if (produtos.length === 10) { %>
-        <% if (categoriaId) { %>
-          <a href="/loja/categorias/<%= categoriaId %>?page=<%= page + 1 %>" class="btn">Próxima »</a>
-        <% } else { %>
-          <a href="/loja/produtos?page=<%= page + 1 %>" class="btn">Próxima »</a>
-        <% } %>
-      <% } %>
-    </div>
   </main>
 
   <%- include('../partials/footer') %>

@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<main class="container perfil-container">
+  <h1>Meu Perfil</h1>
+
+  <% if (mensagem) { %>
+    <div class="alert alert-success"><%= mensagem %></div>
+  <% } %>
+
+  <form action="/loja/perfil/editar" method="POST" class="perfil-form">
+    <label>Nome:</label>
+    <input type="text" name="nome" value="<%= usuario.nome %>" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" value="<%= usuario.email %>" required>
+
+    <label>Telefone:</label>
+    <input type="text" name="telefone" value="<%= usuario.telefone || '' %>">
+
+    <label>Endereço:</label>
+    <input type="text" name="endereco" value="<%= usuario.endereco || '' %>">
+
+    <label>Senha:</label>
+    <input type="password" name="senha" value="<%= usuario.senha %>" required>
+
+    <div class="perfil-buttons">
+      <button type="submit" class="btn-salvar">Salvar Alterações</button>
+    </div>
+  </form>
+
+  <form action="/loja/perfil/excluir" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.');">
+    <button type="submit" class="btn-excluir">Excluir Conta</button>
+  </form>
+</main>
+
+<%- include('../partials/footer') %>
