@@ -3,37 +3,120 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Recuperar/Redefinir Senha</title>
+  <title>Recuperar ou Redefinir Senha | Lu Doces</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fdf8ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 32px 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #a84cb8;
+      margin-bottom: 16px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    label {
+      text-align: left;
+      font-weight: 500;
+      color: #444;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: #a84cb8;
+      box-shadow: 0 0 4px #e4c1ec;
+    }
+
+    button {
+      background-color: #a84cb8;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #8d3aa2;
+    }
+
+    .mensagem {
+      margin: 8px 0;
+      color: #0f766e;
+      font-weight: 500;
+    }
+
+    a {
+      color: #a84cb8;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h2>Recuperação de Senha</h2>
 
     <% if (mensagem) { %>
-      <p style="margin:8px 0; color:#0f766e;"><%= mensagem %></p>
+      <p class="mensagem"><%= mensagem %></p>
     <% } %>
 
     <% if (!token) { %>
-      <!-- Etapa 1: pedir e-mail -->
-      <form action="/esqueceu-senha" method="POST" style="display:flex; flex-direction:column; gap:8px;">
+      <!-- Etapa 1: Solicitar e-mail -->
+      <form action="/esqueceu-senha" method="POST">
         <label for="email">Digite seu e-mail cadastrado:</label>
-        <input type="email" id="email" name="email" required />
+        <input type="email" id="email" name="email" placeholder="exemplo@email.com" required />
         <button type="submit">Enviar link de recuperação</button>
       </form>
     <% } else { %>
-      <!-- Etapa 2: redefinir -->
-      <form action="/reset/<%= token %>" method="POST" style="display:flex; flex-direction:column; gap:8px;">
+      <!-- Etapa 2: Redefinir senha -->
+      <form action="/reset/<%= token %>" method="POST">
         <label for="senha">Nova senha:</label>
-        <input type="password" id="senha" name="senha" required minlength="6" />
+        <input type="password" id="senha" name="senha" placeholder="Digite a nova senha" required minlength="6" />
         <label for="confirma">Confirme a nova senha:</label>
-        <input type="password" id="confirma" name="confirma" required minlength="6" />
+        <input type="password" id="confirma" name="confirma" placeholder="Confirme sua nova senha" required minlength="6" />
         <button type="submit">Salvar nova senha</button>
       </form>
     <% } %>
 
-    <p style="margin-top:12px;">
-      <a href="/login">Voltar ao login</a>
+    <p style="margin-top:16px;">
+      <a href="/login">← Voltar ao login</a>
     </p>
   </div>
 </body>

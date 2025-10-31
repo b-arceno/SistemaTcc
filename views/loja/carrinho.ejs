@@ -1,36 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Carrinho</title>
+  <meta charset="UTF-8">
+  <title>🛒 Meu Carrinho</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .carrinho-container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: rgba(255,247,252,0.95);
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 8px 25px rgba(200,140,220,0.2);
+    }
+    h1{color:#b23eb2;margin-bottom:25px;}
+    table{width:100%;border-collapse:collapse;margin-top:15px;}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #e1c4e9;}
+    th{background:#f3d9f9;color:#b23eb2;font-weight:700;}
+    td{background:#fff0f7;}
+    td img{width:70px;height:70px;object-fit:cover;border-radius:10px;box-shadow:0 3px 6px rgba(178,62,178,0.15);}
+    .quantidade-input{width:50px;text-align:center;border:1px solid #e1c4e9;border-radius:10px;padding:4px;font-weight:600;background:#fff;}
+    .btn-remover{background:linear-gradient(135deg,#ff6b6b,#f87171);color:#fff;border:none;border-radius:15px;padding:6px 12px;font-weight:600;cursor:pointer;transition:0.3s;}
+    .btn-remover:hover{background:linear-gradient(135deg,#ff8585,#fca5a5);}
+    .total-container{text-align:right;margin-top:25px;font-size:1.2rem;color:#e35b8f;font-weight:700;}
+    .acoes-carrinho{display:flex;justify-content:space-between;margin-top:30px;}
+    .btn-continuar,.btn-finalizar{background:linear-gradient(135deg,#c2185b,#e35b8f);color:#fff;border:none;border-radius:20px;padding:10px 22px;text-decoration:none;font-weight:600;transition:0.3s ease;}
+    .btn-continuar:hover,.btn-finalizar:hover{background:linear-gradient(135deg,#ff80ab,#ff99bb);}
+    .mensagem-vazio{text-align:center;color:#b23eb2;font-weight:600;font-size:1.1rem;padding:30px 0;}
+  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
 
-  <main class="container">
-    <h1 class="page-title">Seu Carrinho</h1>
+  <main>
+    <section class="carrinho-container">
+      <h1>🛒 Meu Carrinho</h1>
 
-    <% if (carrinho && carrinho.length > 0) { %>
-      <div class="grid">
-        <% carrinho.forEach(item => { %>
-          <div class="card carrinho-item">
-            <img src="<%= item.imagem %>" alt="<%= item.nome %>" />
-            <h2><%= item.nome %></h2>
-            <p class="price">R$ <%= item.preco.toFixed(2) %></p>
-            <form action="/loja/carrinho/remover/<%= item.id %>" method="POST">
-              <button type="submit" class="btn btn-danger">Remover</button>
-            </form>
+      <% if (carrinho && carrinho.length > 0) { %>
+        <form action="/loja/carrinho/atualizar" method="POST">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% carrinho.forEach(item => { %>
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                      <img src="/uploads/<%= item.imagem %>" alt="<%= item.nome %>">
+                      <span><%= item.nome %></span>
+                    </div>
+                  </td>
+                  <td><input class="quantidade-input" type="number" name="quantidade_<%= item.id %>" value="<%= item.quantidade %>" min="1"></td>
+                  <td>R$ <%= Number(item.preco).toFixed(2) %></td>
+                  <td>R$ <%= (item.quantidade * item.preco).toFixed(2) %></td>
+                  <td><button type="submit" formaction="/loja/carrinho/remover/<%= item.id %>" class="btn-remover">Remover</button></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+
+          <div class="total-container">Total: R$ <%= Number(total).toFixed(2) %></div>
+
+          <div class="acoes-carrinho">
+            <a href="/loja" class="btn-continuar">⬅ Continuar Comprando</a>
+            <!-- Envia o formulário direto para o checkout -->
+            <button type="submit" formaction="/loja/checkout" class="btn-finalizar">Finalizar Pedido ➜</button>
           </div>
-        <% }) %>
-      </div>
-      <div class="carrinho-total">
-        <p><strong>Total: R$ <%= total.toFixed(2) %></strong></p>
-        <a href="/loja/checkout" class="btn">Finalizar Compra</a>
-      </div>
-    <% } else { %>
-      <p class="mensagem-vazia">Seu carrinho está vazio</p>
-    <% } %>
+        </form>
+      <% } else { %>
+        <p class="mensagem-vazio">Seu carrinho está vazio<br>Adicione algo gostoso antes de continuar!</p>
+        <div style="text-align:center;">
+          <a href="/loja" class="btn-continuar">Ir às Compras</a>
+        </div>
+      <% } %>
+    </section>
   </main>
 
   <%- include('../partials/footer') %>

@@ -1,59 +1,56 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const bcrypt = require('bcrypt');
+const { autenticar } = require('../middlewares/auth');
 
 // =====================
 // Página inicial da loja
 // =====================
-router.get('/', async (req, res) => {
+router.get('/', autenticar, async (req, res) => {
   try {
-    const [produtos] = await db.query('SELECT * FROM produtos LIMIT 6');
+    const [produtos] = await db.query(`
+      SELECT p.*, c.nome AS categoria_nome 
+      FROM produtos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LIMIT 6
+    `);
     produtos.forEach(p => p.preco = Number(p.preco));
-    res.render('loja/index', { produtos });
+    res.render('loja/index', { produtos, usuario: req.session.usuario });
   } catch (err) {
-    console.error('Erro ao carregar página da loja:', err);
+    console.error('Erro ao carregar loja:', err);
     res.status(500).send('Erro ao carregar loja.');
   }
 });
 
 // =====================
-// Listagem de produtos
+// Página de categorias
 // =====================
-router.get('/produtos', async (req, res) => {
+router.get('/categorias', autenticar, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const offset = (page - 1) * limit;
-
-    const [produtos] = await db.query('SELECT * FROM produtos LIMIT ? OFFSET ?', [limit, offset]);
-    produtos.forEach(p => p.preco = Number(p.preco));
-
-    res.render('loja/produtos', { produtos, page, categoriaId: null });
+    const [categorias] = await db.query('SELECT * FROM categorias ORDER BY nome');
+    res.render('loja/categorias', { categorias, usuario: req.session.usuario });
   } catch (err) {
-    console.error('Erro ao carregar produtos:', err);
-    res.status(500).send('Erro ao carregar produtos.');
+    console.error('Erro ao carregar categorias:', err);
+    res.status(500).send('Erro ao carregar categorias.');
   }
 });
 
 // =====================
 // Produtos por categoria
 // =====================
-router.get('/categorias/:id', async (req, res) => {
+router.get('/categorias/:id', autenticar, async (req, res) => {
   try {
     const categoriaId = Number(req.params.id);
     if (isNaN(categoriaId)) return res.status(400).send('Categoria inválida.');
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const offset = (page - 1) * limit;
+    const [[categoria]] = await db.query('SELECT * FROM categorias WHERE id = ?', [categoriaId]);
+    if (!categoria) return res.status(404).send('Categoria não encontrada.');
 
-    const [produtos] = await db.query(
-      'SELECT * FROM produtos WHERE categoria_id = ? LIMIT ? OFFSET ?',
-      [categoriaId, limit, offset]
-    );
+    const [produtos] = await db.query('SELECT * FROM produtos WHERE categoria_id = ?', [categoriaId]);
     produtos.forEach(p => p.preco = Number(p.preco));
 
-    res.render('loja/produtos', { produtos, page, categoriaId });
+    res.render('loja/produtos', { categoria, produtos, usuario: req.session.usuario });
   } catch (err) {
     console.error('Erro ao carregar produtos por categoria:', err);
     res.status(500).send('Erro ao carregar produtos por categoria.');
@@ -61,20 +58,37 @@ router.get('/categorias/:id', async (req, res) => {
 });
 
 // =====================
+// Listagem de todos os produtos com paginação
+// =====================
+router.get('/produtos', autenticar, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12;
+    const offset = (page - 1) * limit;
+
+    const [produtos] = await db.query('SELECT * FROM produtos LIMIT ? OFFSET ?', [limit, offset]);
+    produtos.forEach(p => p.preco = Number(p.preco));
+
+    res.render('loja/produtos', { produtos, page, categoria: null, usuario: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar produtos:', err);
+    res.status(500).send('Erro ao carregar produtos.');
+  }
+});
+
+// =====================
 // Detalhes do produto
 // =====================
-router.get('/produtos/:id', async (req, res) => {
+router.get('/produtos/:id', autenticar, async (req, res) => {
   try {
     const produtoId = Number(req.params.id);
     if (isNaN(produtoId)) return res.status(400).send('ID do produto inválido.');
 
-    const [produtos] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
-    if (produtos.length === 0) return res.status(404).send('Produto não encontrado.');
+    const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
+    if (!produto) return res.status(404).send('Produto não encontrado.');
 
-    const produto = produtos[0];
     produto.preco = Number(produto.preco);
-
-    res.render('loja/detalhes', { produto });
+    res.render('loja/detalhes', { produto, usuario: req.session.usuario });
   } catch (err) {
     console.error('Erro ao carregar detalhes do produto:', err);
     res.status(500).send('Erro ao carregar detalhes do produto.');
@@ -82,33 +96,43 @@ router.get('/produtos/:id', async (req, res) => {
 });
 
 // =====================
-// Carrinho
+// Carrinho persistente no banco
 // =====================
-router.get('/carrinho', (req, res) => {
-  const carrinho = req.session.carrinho || [];
-  const total = carrinho.reduce((acc, item) => acc + (item.preco || 0) * (item.quantidade || 0), 0);
+router.get('/carrinho', autenticar, async (req, res) => {
+  try {
+    const usuarioId = req.session.usuario.id;
+    const [carrinho] = await db.query(`
+      SELECT c.quantidade, p.id, p.nome, p.preco, p.imagem
+      FROM carrinho c
+      JOIN produtos p ON c.produto_id = p.id
+      WHERE c.usuario_id = ?
+    `, [usuarioId]);
 
-  res.render('loja/carrinho', { carrinho, total });
+    carrinho.forEach(item => item.preco = Number(item.preco));
+    const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+
+    res.render('loja/carrinho', { carrinho, total, usuario: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar carrinho:', err);
+    res.status(500).send('Erro ao carregar carrinho.');
+  }
 });
 
-router.post('/carrinho/adicionar', async (req, res) => {
+router.post('/carrinho/adicionar', autenticar, async (req, res) => {
   try {
     const { produtoId, quantidade } = req.body;
     const qtd = parseInt(quantidade) || 1;
+    const usuarioId = req.session.usuario.id;
 
-    const [produtos] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
-    if (produtos.length === 0) return res.status(404).send('Produto não encontrado.');
+    const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
+    if (!produto) return res.status(404).send('Produto não encontrado.');
 
-    const produto = produtos[0];
-    produto.preco = Number(produto.preco);
+    const [[itemCarrinho]] = await db.query('SELECT * FROM carrinho WHERE usuario_id = ? AND produto_id = ?', [usuarioId, produtoId]);
 
-    if (!req.session.carrinho) req.session.carrinho = [];
-
-    const index = req.session.carrinho.findIndex(item => item.id === produto.id);
-    if (index >= 0) {
-      req.session.carrinho[index].quantidade += qtd;
+    if (itemCarrinho) {
+      await db.query('UPDATE carrinho SET quantidade = quantidade + ? WHERE id = ?', [qtd, itemCarrinho.id]);
     } else {
-      req.session.carrinho.push({ ...produto, quantidade: qtd });
+      await db.query('INSERT INTO carrinho (usuario_id, produto_id, quantidade) VALUES (?, ?, ?)', [usuarioId, produtoId, qtd]);
     }
 
     res.redirect('/loja/carrinho');
@@ -118,63 +142,85 @@ router.post('/carrinho/adicionar', async (req, res) => {
   }
 });
 
-router.post('/carrinho/remover/:id', (req, res) => {
-  const produtoId = Number(req.params.id);
-  if (!req.session.carrinho) req.session.carrinho = [];
-
-  req.session.carrinho = req.session.carrinho.filter(item => item.id !== produtoId);
-  res.redirect('/loja/carrinho');
-});
-
-// =====================
-// Checkout
-// =====================
-router.get('/checkout', (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
-  const carrinho = req.session.carrinho || [];
-  if (carrinho.length === 0) return res.redirect('/loja/carrinho');
-
-  const total = carrinho.reduce((acc, item) => acc + (item.preco || 0) * (item.quantidade || 0), 0);
-
-  res.render('loja/checkout', { usuario: req.session.usuario, carrinho, total });
-});
-
-router.post('/checkout', async (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
-  const clienteId = req.session.usuario.id;
-  const carrinho = req.session.carrinho || [];
-  if (carrinho.length === 0) return res.redirect('/loja/carrinho');
-
-  const { nome, endereco, forma_pagamento } = req.body;
-
+router.post('/carrinho/remover/:id', autenticar, async (req, res) => {
   try {
-    const total = carrinho.reduce((acc, item) => acc + (item.preco || 0) * (item.quantidade || 0), 0);
-    const formaPagamentoId = parseInt(forma_pagamento);
+    const produtoId = Number(req.params.id);
+    const usuarioId = req.session.usuario.id;
 
-    if (![1, 2, 3].includes(formaPagamentoId)) {
-      throw new Error('Forma de pagamento inválida.');
+    await db.query('DELETE FROM carrinho WHERE usuario_id = ? AND produto_id = ?', [usuarioId, produtoId]);
+    res.redirect('/loja/carrinho');
+  } catch (err) {
+    console.error('Erro ao remover produto do carrinho:', err);
+    res.status(500).send('Erro ao remover produto do carrinho.');
+  }
+});
+
+// =====================
+// Página de checkout
+// =====================
+router.get('/checkout', autenticar, async (req, res) => {
+  try {
+    const usuario = req.session.usuario;
+    res.render('loja/checkout', { usuario });
+  } catch (err) {
+    console.error('Erro ao carregar checkout:', err);
+    res.status(500).send('Erro ao carregar checkout');
+  }
+});
+
+// =====================
+// Finalizar pedido
+// =====================
+router.post('/checkout', autenticar, async (req, res) => {
+  try {
+    const usuario = req.session.usuario;
+    const { forma_pagamento } = req.body;
+    const dados = req.body;
+
+    console.log('🧾 Dados recebidos no checkout:', dados);
+
+    if (!forma_pagamento) {
+      console.log('⚠️ Nenhuma forma de pagamento selecionada!');
+      return res.status(400).send('Selecione uma forma de pagamento.');
     }
 
+    // Coleta os produtos do carrinho
+    const produtosCarrinho = Object.keys(dados)
+      .filter(key => key.startsWith('quantidade_'))
+      .map(key => ({
+        id: key.split('_')[1],
+        quantidade: Number(dados[key])
+      }));
+
+    if (produtosCarrinho.length === 0) {
+      return res.status(400).send('Carrinho vazio.');
+    }
+
+    // Calcula o total
+    let total = 0;
+    for (const item of produtosCarrinho) {
+      const [[produto]] = await db.query('SELECT preco FROM produtos WHERE id = ?', [item.id]);
+      total += produto.preco * item.quantidade;
+    }
+
+    // Cria o pedido
     const [pedidoResult] = await db.query(
-      `INSERT INTO pedidos (cliente_id, data_pedido, status, total, forma_pagamento_id)
-       VALUES (?, NOW(), ?, ?, ?)`,
-      [clienteId, 'pendente', total, formaPagamentoId]
+      'INSERT INTO pedidos (usuario_id, data, total, forma_pagamento) VALUES (?, NOW(), ?, ?)',
+      [usuario.id, total, forma_pagamento]
     );
 
     const pedidoId = pedidoResult.insertId;
 
-    const itensPromises = carrinho.map(item =>
-      db.query(
-        'INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unit) VALUES (?, ?, ?, ?)',
-        [pedidoId, item.id, item.quantidade, item.preco]
-      )
-    );
-    await Promise.all(itensPromises);
+    // Insere os itens do pedido
+    for (const item of produtosCarrinho) {
+      await db.query(
+        'INSERT INTO itens_pedido (pedido_id, produto_id, quantidade) VALUES (?, ?, ?)',
+        [pedidoId, item.id, item.quantidade]
+      );
+    }
 
-    req.session.carrinho = [];
-    res.redirect('/loja/pedidos');
+    console.log('✅ Pedido finalizado com sucesso!');
+    res.redirect('/loja/pedido-sucesso');
   } catch (err) {
     console.error('Erro ao finalizar pedido:', err);
     res.status(500).send('Erro ao finalizar pedido.');
@@ -182,95 +228,113 @@ router.post('/checkout', async (req, res) => {
 });
 
 // =====================
-// Pedidos do usuário
+// Página de sucesso
 // =====================
-router.get('/pedidos', async (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
-  try {
-    const [pedidos] = await db.query(
-      `SELECT p.id, p.data_pedido AS data, p.status, p.total, f.descricao AS forma_pagamento
-       FROM pedidos p
-       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
-       WHERE p.cliente_id = ?
-       ORDER BY p.data_pedido DESC`,
-      [req.session.usuario.id]
-    );
-
-    res.render('loja/pedidos', { pedidos });
-  } catch (err) {
-    console.error('Erro ao carregar pedidos:', err);
-    res.status(500).send('Erro ao carregar pedidos.');
-  }
+router.get('/pedido-sucesso', autenticar, (req, res) => {
+  res.render('loja/pedido-sucesso');
 });
 
 // =====================
-// Página "Meu Perfil"
+// Perfil do usuário
 // =====================
-router.get('/perfil', async (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
+router.get('/perfil', autenticar, async (req, res) => {
   try {
-    const [dadosUsuario] = await db.query('SELECT * FROM clientes WHERE id = ?', [req.session.usuario.id]);
-    if (!dadosUsuario || dadosUsuario.length === 0) return res.status(404).send('Usuário não encontrado');
-    res.render('loja/perfil', { usuario: dadosUsuario[0], mensagem: null });
+    const [[usuario]] = await db.query('SELECT * FROM usuarios WHERE id = ?', [req.session.usuario.id]);
+    if (!usuario) return res.status(404).send('Usuário não encontrado.');
+    res.render('loja/perfil', { usuario, mensagem: null });
   } catch (err) {
     console.error('Erro ao carregar perfil:', err);
     res.status(500).send('Erro ao carregar perfil.');
   }
 });
 
-// =====================
-// Atualizar perfil
-// =====================
-router.post('/perfil/editar', async (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
-  const { nome, email, telefone, endereco, senha } = req.body;
-
+router.post('/perfil/editar', autenticar, async (req, res) => {
   try {
-    await db.query(
-      `UPDATE clientes 
-       SET nome = ?, email = ?, telefone = ?, endereco = ?, senha = ?
-       WHERE id = ?`,
-      [nome, email, telefone, endereco, senha, req.session.usuario.id]
-    );
+    const { nome, email, telefone, cep, rua, numero, complemento, bairro, cidade, estado, senha } = req.body;
+    const usuarioId = req.session.usuario.id;
 
-    req.session.usuario.nome = nome;
-    req.session.usuario.email = email;
-    req.session.usuario.telefone = telefone;
-    req.session.usuario.endereco = endereco;
+    let query = `
+      UPDATE usuarios SET 
+      nome = ?, email = ?, telefone = ?, cep = ?, rua = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?
+    `;
+    const params = [nome, email, telefone, cep, rua, numero, complemento, bairro, cidade, estado];
 
-    const [dadosAtualizados] = await db.query('SELECT * FROM clientes WHERE id = ?', [req.session.usuario.id]);
+    if (senha && senha.trim() !== '') {
+      const senhaCriptografada = await bcrypt.hash(senha, 10);
+      query += ', senha = ?';
+      params.push(senhaCriptografada);
+    }
 
-    res.render('loja/perfil', { usuario: dadosAtualizados[0], mensagem: 'Perfil atualizado com sucesso!' });
+    query += ' WHERE id = ?';
+    params.push(usuarioId);
+
+    await db.query(query, params);
+    const [[usuarioAtualizado]] = await db.query('SELECT * FROM usuarios WHERE id = ?', [usuarioId]);
+    req.session.usuario = usuarioAtualizado;
+
+    res.render('loja/perfil', { usuario: usuarioAtualizado, mensagem: 'Perfil atualizado com sucesso!' });
   } catch (err) {
     console.error('Erro ao atualizar perfil:', err);
     res.status(500).send('Erro ao atualizar perfil.');
   }
 });
 
-// =====================
-// Excluir conta
-// =====================
-router.post('/perfil/excluir', async (req, res) => {
-  if (!req.session.usuario) return res.redirect('/login');
-
+router.post('/perfil/excluir', autenticar, async (req, res) => {
   try {
-    const usuarioId = req.session.usuario.id;
-    await db.query(
-      'DELETE FROM itens_pedido WHERE pedido_id IN (SELECT id FROM pedidos WHERE cliente_id = ?)',
-      [usuarioId]
-    );
-    await db.query('DELETE FROM pedidos WHERE cliente_id = ?', [usuarioId]);
-    await db.query('DELETE FROM clientes WHERE id = ?', [usuarioId]);
-
-    req.session.destroy(() => {
-      res.redirect('/login');
-    });
+    await db.query('DELETE FROM usuarios WHERE id = ?', [req.session.usuario.id]);
+    req.session.destroy();
+    res.redirect('/login');
   } catch (err) {
     console.error('Erro ao excluir conta:', err);
     res.status(500).send('Erro ao excluir conta.');
+  }
+});
+
+// =====================
+// Pedidos do usuário
+// =====================
+router.get('/pedidos', autenticar, async (req, res) => {
+  try {
+    const [pedidos] = await db.query(`
+      SELECT p.id, p.data_pedido AS data, p.status, p.total, f.descricao AS forma_pagamento
+      FROM pedidos p
+      JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
+      WHERE p.cliente_id = ?
+      ORDER BY p.data_pedido DESC
+    `, [req.session.usuario.id]);
+
+    res.render('loja/pedidos', { pedidos, usuario: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar pedidos:', err);
+    res.status(500).send('Erro ao carregar pedidos.');
+  }
+});
+
+router.get('/pedidos/:id', autenticar, async (req, res) => {
+  try {
+    const pedidoId = Number(req.params.id);
+    if (isNaN(pedidoId)) return res.status(400).send('ID do pedido inválido.');
+
+    const [[pedido]] = await db.query(`
+      SELECT p.id, p.data_pedido AS data, p.status, p.total, f.descricao AS forma_pagamento
+      FROM pedidos p
+      JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
+      WHERE p.id = ? AND p.cliente_id = ?
+    `, [pedidoId, req.session.usuario.id]);
+
+    if (!pedido) return res.status(404).send('Pedido não encontrado.');
+
+    const [itens] = await db.query(`
+      SELECT i.quantidade, i.preco_unit AS preco_unitario, pr.nome AS produto_nome
+      FROM itens_pedido i
+      JOIN produtos pr ON i.produto_id = pr.id
+      WHERE i.pedido_id = ?
+    `, [pedidoId]);
+
+    res.render('loja/pedidosDetalhe', { pedido, itens, usuario: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar detalhes do pedido:', err);
+    res.status(500).send('Erro ao carregar detalhes do pedido.');
   }
 });
 

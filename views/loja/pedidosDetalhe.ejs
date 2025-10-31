@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Pedido #<%= pedido.id %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .detalhes-container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: #fff0f6; /* fundo rosa claro */
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 8px 25px rgba(233,158,185,0.5);
+      text-align: left;
+    }
+
+    h1 {
+      color: #d9155c;
+      margin-bottom: 25px;
+      font-weight: bold;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .pedido-info span {
+      display: inline-block;
+      margin-right: 15px;
+      font-weight: 600;
+      color: #700a32;
+    }
+
+    .pedido-status {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: capitalize;
+      display: inline-block;
+    }
+    .pedido-status.pendente { background: #fff3cd; color: #b45309; }
+    .pedido-status.em\ preparo { background: #fde68a; color: #92400e; }
+    .pedido-status.finalizado { background: #bae6fd; color: #0369a1; }
+    .pedido-status.a\ caminho { background: #ddd6fe; color: #5b21b6; }
+    .pedido-status.entregue { background: #bbf7d0; color: #166534; }
+    .pedido-status.cancelado { background: #fecaca; color: #991b1b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      background: #fffafc;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(233,158,185,0.3);
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f48bae; 
+      color: #700a32; 
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      background-color: #fff0f6;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #ffe6f0;
+    }
+
+    tr:hover td {
+      background-color: #fddde9;
+      transition: 0.2s;
+    }
+
+    .total-pedido {
+      text-align: right;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-top: 15px;
+      color: #d9155c;
+    }
+
+    .btn-voltar {
+      display: inline-block;
+      margin-top: 25px;
+      background: linear-gradient(135deg, #d9155c, #f48bae);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+
+    .btn-voltar:hover {
+      background: linear-gradient(135deg, #f48bae, #ffe6f0);
+      color: #700a32;
+    }
+
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+
+  <main>
+    <section class="detalhes-container">
+      <h1>Pedido #<%= pedido.id %></h1>
+
+      <div class="pedido-info">
+        <span>Data: <%= new Date(pedido.data).toLocaleDateString() %></span>
+        <span>Status: 
+          <span class="pedido-status <%= pedido.status.replace(' ', '\\ ') %>">
+            <%= pedido.status.charAt(0).toUpperCase() + pedido.status.slice(1) %>
+          </span>
+        </span>
+        <span>Pagamento: <%= pedido.forma_pagamento %></span>
+      </div>
+
+      <% if (itens && itens.length > 0) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Preço Unitário</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% itens.forEach(item => { %>
+              <tr>
+                <td><%= item.produto_nome %></td>
+                <td><%= item.quantidade %></td>
+                <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
+                <td>R$ <%= (item.quantidade * item.preco_unitario).toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+      <p class="total-pedido">Total: R$ <%= Number(pedido.total).toFixed(2) %></p>
+
+      <a href="/loja/pedidos" class="btn-voltar">⬅ Voltar para Meus Pedidos</a>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -5,9 +5,9 @@ const MySQLStore = require('express-mysql-session')(session);
 const db = require('./config/database'); // mysql2/promise
 
 // Rotas
-const authRoutes = require('./routes/index');      // login, registro, logout
-const lojaRoutes = require('./routes/lojaRoutes'); // loja, produtos, carrinho, checkout, pedidos
-const adminRoutes = require('./routes/adminRoutes'); // área admin (caso tenha)
+const authRoutes = require('./routes/authRoutes');      // login, registro, logout
+const lojaRoutes = require('./routes/lojaRoutes');      // loja, produtos, carrinho, checkout, pedidos
+const adminRoutes = require('./routes/adminRoutes');    // área admin (caso tenha)
 
 const app = express();
 const port = 3000;
@@ -30,7 +30,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 2 // 2 horas
+        maxAge: 1000 * 60 * 60 * 2, // 2 horas
+        sameSite: 'lax',
+        secure: false // importante para HTTP local
     }
 }));
 
@@ -48,11 +50,7 @@ app.use('/admin', adminRoutes);  // /admin
 // Redirecionamento padrão
 app.get('/', (req, res) => {
     if (req.session.usuario) {
-        if (req.session.usuario.tipo_usuario_id === 1) {
-            return res.redirect('/admin');
-        } else {
-            return res.redirect('/loja');
-        }
+        return res.redirect(req.session.usuario.tipo_usuario_id === 1 ? '/admin' : '/loja');
     }
     res.redirect('/login');
 });

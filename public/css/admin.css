@@ -309,8 +309,95 @@ body {
 /* ---------------------- RESPONSIVIDADE ---------------------- */
 @media (max-width: 768px) {
   .admin-container { flex-direction: column; }
-  .sidebar { width: 100%; border-radius: 0 0 20px 20px; display: flex; flex-direction: row; overflow-x: auto; }
+  .sidebar { 
+    width: 100%; 
+    border-radius: 0 0 20px 20px; 
+    display: flex; 
+    flex-direction: row; 
+    overflow-x: auto; 
+  }
   .sidebar ul { display: flex; flex-direction: row; gap: 15px; }
   .sidebar ul li { margin: 0; }
   .content { padding: 20px 10px; }
+}
+
+/* ---------------------- TÍTULO DAS PÁGINAS ---------------------- */
+h1 {
+  text-align: center;
+  color: #d9155c;
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* ---------------------- SELECT DE STATUS ---------------------- */
+select[name="status"] {
+  padding: 6px 10px;
+  border-radius: 15px;
+  border: 1px solid #f48bae;
+  background-color: #fff0f6;
+  color: #700a32;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+select[name="status"]:hover,
+select[name="status"]:focus {
+  border-color: #d9155c;
+  box-shadow: 0 0 6px rgba(217, 21, 92, 0.3);
+  outline: none;
+}
+
+/* ---------------------- TABELAS (PEDIDOS) ---------------------- */
+.tabela-admin {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
+  background: #fffafc;
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(233, 158, 185, 0.4);
+  font-size: 15px;
+}
+
+.tabela-admin th,
+.tabela-admin td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.tabela-admin th {
+  background-color: #f48bae;
+  color: #700a32;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.tabela-admin tr:nth-child(even) {
+  background-color: #fff0f6;
+}
+
+.tabela-admin tr:hover {
+  background-color: #ffe6f0;
+  transition: 0.2s;
+}
+
+/* ---------------------- BOTÃO "VER" (AÇÕES NA TABELA) ---------------------- */
+.btn-editar {
+  background-color: #fddde9;
+  color: #700a32;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #f48bae;
+  transition: 0.3s;
+}
+
+.btn-editar:hover {
+  background-color: #f48bae;
+  color: white;
+  box-shadow: 0 3px 10px rgba(217, 21, 92, 0.3);
+  transform: scale(1.05);
 }

@@ -1,0 +1,39 @@
+<%- include('../partials/adminHeader', { titulo: 'Detalhes do Pedido' }) %>
+
+<h1>Detalhes do Pedido #<%= pedido.id %></h1>
+
+<div class="pedido-detalhes">
+  <p><strong>Cliente:</strong> <%= pedido.cliente %></p>
+  <p><strong>Data do Pedido:</strong> <%= new Date(pedido.data_pedido).toLocaleString() %></p>
+  <p><strong>Status:</strong> <%= pedido.status %></p>
+  <p><strong>Forma de Pagamento:</strong> <%= pedido.forma_pagamento %></p>
+  <p><strong>Total:</strong> R$ <%= pedido.total ? Number(pedido.total).toFixed(2) : '0.00' %></p>
+</div>
+
+<h2>Itens do Pedido</h2>
+<table class="tabela-admin">
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Quantidade</th>
+      <th>Preço Unitário</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% itens.forEach(item => { %>
+      <tr>
+        <td><%= item.produto_nome %></td>
+        <td><%= item.quantidade %></td>
+        <td>R$ <%= item.preco_unitario ? Number(item.preco_unitario).toFixed(2) : '0.00' %></td>
+        <td>R$ <%= (item.quantidade && item.preco_unitario) ? (item.quantidade * Number(item.preco_unitario)).toFixed(2) : '0.00' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<p style="margin-top:20px;">
+  <a href="/admin/pedidos" class="btn-editar">← Voltar</a>
+</p>
+
+<%- include('../partials/adminFooter') %>

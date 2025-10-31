@@ -1,6 +1,7 @@
 function autenticar(req, res, next) {
+  console.log('Sessão do usuário (autenticar):', req.session.usuario);
   if (!req.session.usuario) {
-    return res.redirect('/login'); // só entra se estiver logado
+    return res.redirect('/login');
   }
   next();
 }

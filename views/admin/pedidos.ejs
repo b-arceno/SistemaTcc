@@ -1,32 +1,45 @@
 <%- include('../partials/adminHeader', { titulo: 'Pedidos' }) %>
 
-<h1>Gerenciar Pedidos</h1>
+<main class="conteudo-admin">
+  <h1 class="titulo-pagina">Gerenciar Pedidos</h1>
 
-<table class="tabela-admin">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Cliente</th>
-      <th>Data</th>
-      <th>Status</th>
-      <th>Pagamento</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% pedidos.forEach(p => { %>
+  <table class="tabela-admin pedidos-tabela">
+    <thead>
       <tr>
-        <td><%= p.id %></td>
-        <td><%= p.cliente %></td>
-        <td><%= new Date(p.data_pedido).toLocaleDateString() %></td>
-        <td><%= p.status %></td>
-        <td><%= p.forma_pagamento %></td>
-        <td>
-          <a href="/admin/pedidos/visualizar/<%= p.id %>" class="btn btn-editar">Ver</a>
-        </td>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Data</th>
+        <th>Status</th>
+        <th>Pagamento</th>
+        <th>Ações</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% pedidos.forEach(p => { %>
+        <tr>
+          <td><%= p.id %></td>
+          <td><%= p.cliente %></td>
+          <td><%= new Date(p.data_pedido).toLocaleDateString() %></td>
+          <td>
+            <form action="/admin/pedidos/<%= p.id %>/status" method="POST">
+              <select name="status" class="select-status" onchange="this.form.submit()">
+                <option value="pendente" <%= p.status === 'pendente' ? 'selected' : '' %>>Pendente</option>
+                <option value="em preparo" <%= p.status === 'em preparo' ? 'selected' : '' %>>Em preparo</option>
+                <option value="finalizado" <%= p.status === 'finalizado' ? 'selected' : '' %>>Finalizado</option>
+                <option value="a caminho" <%= p.status === 'a caminho' ? 'selected' : '' %>>A caminho</option>
+                <option value="entregue" <%= p.status === 'entregue' ? 'selected' : '' %>>Entregue</option>
+                <option value="cancelado" <%= p.status === 'cancelado' ? 'selected' : '' %>>Cancelado</option>
+              </select>
+            </form>
+          </td>
+          <td><%= p.forma_pagamento %></td>
+          <td>
+            <a href="/admin/pedidos/visualizar/<%= p.id %>" class="btn-ver">Ver detalhes</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</main>
 
 <%- include('../partials/adminFooter') %>
