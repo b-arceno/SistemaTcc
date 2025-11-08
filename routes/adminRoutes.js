@@ -34,10 +34,9 @@ router.get('/', autenticar, isAdmin, async (req, res) => {
         p.total, 
         f.descricao AS forma_pagamento
       FROM pedidos p
-      JOIN usuarios u ON p.cliente_id = u.id
+      JOIN usuarios u ON p.usuario_id = u.id
       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
       ORDER BY p.data_pedido DESC
-      LIMIT 10
     `);
 
     pedidos.forEach(p => p.total = parseNumber(p.total));
@@ -173,10 +172,11 @@ router.get('/pedidos', autenticar, isAdmin, async (req, res) => {
         p.total, 
         f.descricao AS forma_pagamento
       FROM pedidos p
-      JOIN usuarios u ON p.cliente_id = u.id
+      JOIN usuarios u ON p.usuario_id = u.id
       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
       ORDER BY p.data_pedido DESC
     `);
+
     pedidos.forEach(p => p.total = parseNumber(p.total));
     res.render('admin/pedidos', { pedidos });
   } catch (err) {
@@ -191,7 +191,7 @@ router.get('/pedidos/visualizar/:id', autenticar, isAdmin, async (req, res) => {
     const [[pedido]] = await db.query(`
       SELECT p.*, u.nome AS cliente, f.descricao AS forma_pagamento
       FROM pedidos p
-      JOIN usuarios u ON p.cliente_id = u.id
+      JOIN usuarios u ON p.usuario_id = u.id
       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
       WHERE p.id = ?
     `, [pedidoId]);
@@ -253,5 +253,58 @@ router.get('/relatorios', autenticar, isAdmin, async (req, res) => {
     res.render('admin/relatorios', { vendas: [], status: [] });
   }
 });
+
+// =============================
+// VARIAÇÕES DE PRODUTO
+// =============================
+router.get('/variacoes', autenticar, isAdmin, async (req, res) => {
+  try {
+    const [variacoes] = await db.query(`
+      SELECT v.id, v.nome, v.preco, p.nome AS produto_nome
+      FROM variacoes_produto v
+      JOIN produtos p ON v.produto_id = p.id
+      ORDER BY p.nome ASC
+    `);
+    const [produtos] = await db.query('SELECT id, nome FROM produtos');
+    res.render('admin/variacoes', { variacoes, produtos });
+  } catch (err) {
+    console.error(err);
+    res.render('admin/variacoes', { variacoes: [], produtos: [] });
+  }
+});
+
+// Formulário para adicionar nova variação
+router.get('/variacoes/adicionar', autenticar, isAdmin, async (req, res) => {
+  const [produtos] = await db.query('SELECT id, nome FROM produtos');
+  res.render('admin/adicionarVariacao', { produtos });
+});
+
+// Salvar nova variação
+router.post('/variacoes/adicionar', autenticar, isAdmin, async (req, res) => {
+  const { produto_id, nome, preco } = req.body;
+  try {
+    await db.query(
+      'INSERT INTO variacoes_produto (produto_id, nome, preco) VALUES (?, ?, ?)',
+      [produto_id, nome, preco]
+    );
+    res.redirect('/admin/variacoes');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao adicionar variação.');
+  }
+});
+
+// Deletar variação
+router.get('/variacoes/deletar/:id', autenticar, isAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    await db.query('DELETE FROM variacoes_produto WHERE id = ?', [id]);
+    res.redirect('/admin/variacoes');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao deletar variação.');
+  }
+});
+
 
 module.exports = router;

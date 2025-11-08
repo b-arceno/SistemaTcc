@@ -4,27 +4,261 @@
   <meta charset="UTF-8" />
   <title><%= produto.nome %></title>
   <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body {
+      background-color: #fff0f6;
+    }
+
+    .produto-detalhe {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      padding: 3rem;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .produto-imagem img {
+      width: 420px;
+      height: 420px;
+      object-fit: cover;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(217, 21, 92, 0.2);
+    }
+
+    .produto-info {
+      flex: 1;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 0 25px rgba(217, 21, 92, 0.15);
+    }
+
+    .produto-info h1 {
+      margin-bottom: .8rem;
+      font-size: 2rem;
+      color: #d9155c;
+    }
+
+    .avaliacao {
+      color: #ff9eaa;
+      font-size: 1.3rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .avaliacao span {
+      color: #555;
+      margin-left: .5rem;
+      font-size: 0.95rem;
+    }
+
+    .price {
+      color: #d9155c;
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .info-extra p {
+      margin: .4rem 0;
+      color: #444;
+    }
+
+    .btn {
+      background-color: #d9155c;
+      color: white;
+      border: none;
+      padding: .8rem 1.5rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #b80d4d;
+    }
+
+    /* Avaliações */
+    .avaliacoes-container {
+      background: #fffafc;
+      border-radius: 20px;
+      margin: 3rem auto;
+      max-width: 800px;
+      padding: 2rem;
+      box-shadow: 0 0 20px rgba(217, 21, 92, 0.15);
+    }
+
+    .avaliacoes-container h2 {
+      color: #d9155c;
+      margin-bottom: 1rem;
+    }
+
+    .avaliacao-item {
+      border-bottom: 1px solid #f8d7da;
+      padding: 1rem 0;
+    }
+
+    .avaliacao-item strong {
+      color: #700a32;
+    }
+
+    .avaliacao-item small {
+      color: #999;
+      font-size: 0.85rem;
+    }
+
+    .avaliar-form {
+      margin-top: 2rem;
+      text-align: left;
+    }
+
+    .avaliar-form label {
+      color: #700a32;
+      font-weight: 600;
+    }
+
+    .avaliar-form textarea,
+    .avaliar-form select {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #f8cdd8;
+      padding: .6rem;
+      margin-top: .3rem;
+      margin-bottom: 1rem;
+      resize: none;
+    }
+
+    .avaliar-form button {
+      background: linear-gradient(135deg, #d9155c, #f48bae);
+      border: none;
+      color: white;
+      padding: .8rem 1.6rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .avaliar-form button:hover {
+      background: #f48bae;
+      color: #700a32;
+    }
+
+    /* Seleção de variação */
+    .form-variacao select {
+      width: 100%;
+      padding: .6rem;
+      border-radius: 8px;
+      border: 1px solid #f8cdd8;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
 
   <main class="container produto-detalhe">
     <div class="produto-imagem">
-      <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" />
+      <img src="<%= produto.imagem %>" alt="<%= produto.nome %>">
     </div>
+
     <div class="produto-info">
       <h1><%= produto.nome %></h1>
-      <p class="price">R$ <%= produto.preco.toFixed(2) %></p>
+
+      <div class="avaliacao">
+        ★★★★★ <span><%= (Number(produto.avaliacao) || 0).toFixed(1) %> / 5.0</span>
+      </div>
+
+      <p class="price" id="preco">R$ <%= (Number(produto.preco) || 0).toFixed(2) %></p>
       <p><%= produto.descricao %></p>
-      <form action="/loja/carrinho/adicionar" method="POST">
+
+      <div class="info-extra">
+        <% if (produto.peso) { %>
+          <p><strong>Peso:</strong> <%= produto.peso %></p>
+        <% } %>
+        <% if (produto.ingredientes) { %>
+          <p><strong>Ingredientes:</strong> <%= produto.ingredientes %></p>
+        <% } %>
+        <% if (produto.disponibilidade) { %>
+          <p><strong>Disponibilidade:</strong> <%= produto.disponibilidade %></p>
+        <% } %>
+      </div>
+
+      <!-- Variações -->
+      <form action="/loja/carrinho/adicionar" method="POST" class="form-variacao" style="margin-top: 1rem;">
         <input type="hidden" name="produtoId" value="<%= produto.id %>">
+        <input type="hidden" name="precoSelecionado" id="precoSelecionado" value="<%= produto.preco %>">
+
+        <% if (variacoes && variacoes.length > 0) { %>
+          <label for="variacao">Escolha o tamanho/peso:</label>
+          <select name="variacao_id" id="variacao" required>
+            <% variacoes.forEach(v => { %>
+              <option value="<%= v.id %>" data-preco="<%= Number(v.preco).toFixed(2) %>">
+                <%= v.nome %> — R$ <%= Number(v.preco).toFixed(2) %>
+              </option>
+            <% }) %>
+          </select>
+        <% } %>
+
         <label>Quantidade:</label>
-        <input type="number" name="quantidade" value="1" min="1" />
+        <input type="number" name="quantidade" value="1" min="1" style="width: 60px; margin-left: .5rem;">
         <button type="submit" class="btn">Adicionar ao Carrinho</button>
       </form>
+
     </div>
   </main>
 
+  <!-- Avaliações -->
+  <section class="avaliacoes-container">
+    <h2>Avaliações dos clientes 💬</h2>
+
+    <% if (avaliacoes && avaliacoes.length > 0) { %>
+      <% avaliacoes.forEach(a => { %>
+        <div class="avaliacao-item">
+          <strong><%= a.nome_usuario %></strong> — <%= a.nota %> ★
+          <p><%= a.comentario %></p>
+          <small><%= new Date(a.data_avaliacao).toLocaleDateString() %></small>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="color:#700a32;">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
+    <% } %>
+
+    <form action="/loja/produtos/<%= produto.id %>/avaliar" method="POST" class="avaliar-form">
+      <label for="nota">Sua nota:</label>
+      <select name="nota" id="nota" required>
+        <option value="">Selecione...</option>
+        <option value="5">5 - Excelente</option>
+        <option value="4">4 - Muito bom</option>
+        <option value="3">3 - Bom</option>
+        <option value="2">2 - Regular</option>
+        <option value="1">1 - Ruim</option>
+      </select>
+
+      <label for="comentario">Comentário:</label>
+      <textarea name="comentario" id="comentario" rows="3" placeholder="Escreva sua opinião..." required></textarea>
+
+      <button type="submit">Enviar Avaliação</button>
+    </form>
+  </section>
+
   <%- include('../partials/footer') %>
+
+  <!-- 🧁 Script: atualiza preço ao trocar variação -->
+  <script>
+    const selectVariacao = document.getElementById('variacao');
+    const precoElement = document.getElementById('preco');
+    const precoHidden = document.getElementById('precoSelecionado');
+
+    if (selectVariacao) {
+      selectVariacao.addEventListener('change', () => {
+        const option = selectVariacao.selectedOptions[0];
+        const preco = option.getAttribute('data-preco');
+        precoElement.textContent = `R$ ${parseFloat(preco).toFixed(2)}`;
+        precoHidden.value = preco; // valor enviado ao backend
+      });
+    }
+  </script>
 </body>
 </html>

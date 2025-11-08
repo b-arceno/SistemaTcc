@@ -77,36 +77,128 @@ router.get('/produtos', autenticar, async (req, res) => {
 });
 
 // =====================
-// Detalhes do produto
+// Detalhes do Produto
 // =====================
 router.get('/produtos/:id', autenticar, async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const produtoId = Number(req.params.id);
-    if (isNaN(produtoId)) return res.status(400).send('ID do produto inválido.');
+    // Busca o produto e sua média de avaliação
+    const [[produto]] = await db.query(`
+      SELECT 
+        p.*, 
+        COALESCE(AVG(a.nota), 0) AS avaliacao_media
+      FROM produtos p
+      LEFT JOIN avaliacoes a ON a.produto_id = p.id
+      WHERE p.id = ?
+      GROUP BY p.id
+    `, [id]);
 
-    const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
-    if (!produto) return res.status(404).send('Produto não encontrado.');
+    if (!produto) {
+      return res.status(404).send('Produto não encontrado.');
+    }
 
+    // Garante que o preço seja numérico
     produto.preco = Number(produto.preco);
-    res.render('loja/detalhes', { produto, usuario: req.session.usuario });
-  } catch (err) {
-    console.error('Erro ao carregar detalhes do produto:', err);
-    res.status(500).send('Erro ao carregar detalhes do produto.');
+
+    // Busca as variações (gramas, tamanhos etc.)
+    const [variacoes] = await db.query(`
+      SELECT * 
+      FROM variacoes_produto 
+      WHERE produto_id = ?
+      ORDER BY preco ASC
+    `, [id]);
+
+    // Busca as avaliações com nome do usuário
+    const [avaliacoes] = await db.query(`
+      SELECT 
+        a.id,
+        a.nota,
+        a.comentario,
+        DATE_FORMAT(a.data_avaliacao, '%d/%m/%Y %H:%i') AS data_avaliacao,
+        u.nome AS nome_usuario
+      FROM avaliacoes a
+      JOIN usuarios u ON a.usuario_id = u.id
+      WHERE a.produto_id = ?
+      ORDER BY a.data_avaliacao DESC
+    `, [id]);
+
+    res.render('loja/detalhes', {
+      produto,
+      variacoes,
+      avaliacoes,
+      usuario: req.session.usuario
+    });
+  } catch (erro) {
+    console.error('Erro ao carregar os detalhes do produto:', erro);
+    res.status(500).send('Erro ao carregar os detalhes do produto.');
   }
 });
 
 // =====================
-// Carrinho persistente no banco
+// Enviar Avaliação
+// =====================
+router.post('/produtos/:id/avaliar', autenticar, async (req, res) => {
+  const produtoId = req.params.id;
+  const usuarioId = req.session.usuario.id;
+  const { nota, comentario } = req.body;
+
+  try {
+    // Validação simples
+    if (!nota || isNaN(nota) || nota < 1 || nota > 5) {
+      return res.status(400).send('Nota inválida.');
+    }
+
+    // Insere a nova avaliação
+    await db.query(`
+      INSERT INTO avaliacoes (usuario_id, produto_id, nota, comentario)
+      VALUES (?, ?, ?, ?)
+    `, [usuarioId, produtoId, nota, comentario]);
+
+    // Calcula a nova média das avaliações do produto
+    const [[{ media }]] = await db.query(`
+      SELECT AVG(nota) AS media 
+      FROM avaliacoes 
+      WHERE produto_id = ?
+    `, [produtoId]);
+
+    // Atualiza o campo "avaliacao" na tabela de produtos
+    const mediaFinal = media ? Number(media).toFixed(1) : 0.0;
+
+    await db.query(`
+      UPDATE produtos 
+      SET avaliacao = ? 
+      WHERE id = ?
+    `, [mediaFinal, produtoId]);
+
+    res.redirect(`/loja/produtos/${produtoId}`);
+  } catch (error) {
+    console.error('Erro ao enviar avaliação:', error);
+    res.status(500).send('Erro ao enviar avaliação.');
+  }
+});
+
+// =====================
+// Carrinho persistente
 // =====================
 router.get('/carrinho', autenticar, async (req, res) => {
   try {
     const usuarioId = req.session.usuario.id;
     const [carrinho] = await db.query(`
-      SELECT c.quantidade, p.id, p.nome, p.preco, p.imagem
+      SELECT 
+        c.produto_id AS id,
+        p.nome,
+        COALESCE(v.preco, p.preco) AS preco,
+        c.quantidade,
+        c.variacao_id,
+        v.nome AS variacao_nome,
+        p.imagem
       FROM carrinho c
       JOIN produtos p ON c.produto_id = p.id
+      LEFT JOIN variacoes_produto v ON c.variacao_id = v.id
       WHERE c.usuario_id = ?
     `, [usuarioId]);
+
 
     carrinho.forEach(item => item.preco = Number(item.preco));
     const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
@@ -118,29 +210,54 @@ router.get('/carrinho', autenticar, async (req, res) => {
   }
 });
 
+// =====================
+// Adicionar ao carrinho (corrigido com variações)
+// =====================
 router.post('/carrinho/adicionar', autenticar, async (req, res) => {
+  const usuarioId = req.session.usuario.id;
+  const { produtoId, variacao_id, quantidade } = req.body;
+
   try {
-    const { produtoId, quantidade } = req.body;
-    const qtd = parseInt(quantidade) || 1;
-    const usuarioId = req.session.usuario.id;
-
+    // Busca o produto principal
     const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
-    if (!produto) return res.status(404).send('Produto não encontrado.');
-
-    const [[itemCarrinho]] = await db.query('SELECT * FROM carrinho WHERE usuario_id = ? AND produto_id = ?', [usuarioId, produtoId]);
-
-    if (itemCarrinho) {
-      await db.query('UPDATE carrinho SET quantidade = quantidade + ? WHERE id = ?', [qtd, itemCarrinho.id]);
-    } else {
-      await db.query('INSERT INTO carrinho (usuario_id, produto_id, quantidade) VALUES (?, ?, ?)', [usuarioId, produtoId, qtd]);
+    if (!produto) {
+      return res.status(404).send('Produto não encontrado.');
     }
 
+    let precoFinal = produto.preco;
+    let variacaoNome = null;
+
+    // Se tiver variação, buscar o preço correto
+    if (variacao_id && variacao_id !== '') {
+      const [[variacao]] = await db.query(
+        'SELECT * FROM variacoes_produto WHERE id = ? AND produto_id = ?',
+        [variacao_id, produtoId]
+      );
+
+      if (!variacao) {
+        return res.status(404).send('Variação não encontrada.');
+      }
+
+      precoFinal = variacao.preco;
+      variacaoNome = variacao.nome;
+    }
+
+// Adiciona ao carrinho
+await db.query(`
+  INSERT INTO carrinho (usuario_id, produto_id, variacao_id, quantidade, preco_unitario)
+  VALUES (?, ?, ?, ?, ?)
+`, [usuarioId, produtoId, variacao_id || null, quantidade, precoFinal]);
+
+
+    console.log(`✅ Produto "${produto.nome}" (${variacaoNome || 'sem variação'}) adicionado ao carrinho com preço: ${precoFinal}`);
+
     res.redirect('/loja/carrinho');
-  } catch (err) {
-    console.error('Erro ao adicionar produto ao carrinho:', err);
+  } catch (error) {
+    console.error('❌ Erro ao adicionar produto ao carrinho:', error);
     res.status(500).send('Erro ao adicionar produto ao carrinho.');
   }
 });
+
 
 router.post('/carrinho/remover/:id', autenticar, async (req, res) => {
   try {
@@ -156,12 +273,37 @@ router.post('/carrinho/remover/:id', autenticar, async (req, res) => {
 });
 
 // =====================
-// Página de checkout
+// Checkout
 // =====================
 router.get('/checkout', autenticar, async (req, res) => {
   try {
-    const usuario = req.session.usuario;
-    res.render('loja/checkout', { usuario });
+    const usuarioId = req.session.usuario.id;
+
+    // Busca carrinho com preço correto (produto ou variação)
+    const [carrinho] = await db.query(`
+      SELECT 
+        c.produto_id,
+        c.variacao_id,
+        COALESCE(v.preco, p.preco) AS preco_unitario,
+        c.quantidade,
+        p.nome,
+        v.nome AS variacao_nome,
+        p.imagem
+      FROM carrinho c
+      JOIN produtos p ON c.produto_id = p.id
+      LEFT JOIN variacoes_produto v ON c.variacao_id = v.id
+      WHERE c.usuario_id = ?
+    `, [usuarioId]);
+
+    carrinho.forEach(item => item.preco_unitario = Number(item.preco_unitario));
+
+    if (carrinho.length === 0) return res.redirect('/loja/carrinho');
+
+    const total = carrinho.reduce((acc, item) => acc + item.preco_unitario * item.quantidade, 0);
+
+    const [formasPagamento] = await db.query('SELECT * FROM forma_pagamento');
+
+    res.render('loja/checkout', { usuario: req.session.usuario, carrinho, total, formasPagamento });
   } catch (err) {
     console.error('Erro ao carregar checkout:', err);
     res.status(500).send('Erro ao carregar checkout');
@@ -171,67 +313,61 @@ router.get('/checkout', autenticar, async (req, res) => {
 // =====================
 // Finalizar pedido
 // =====================
-router.post('/checkout', autenticar, async (req, res) => {
+router.post('/checkout/finalizar', autenticar, async (req, res) => {
   try {
-    const usuario = req.session.usuario;
-    const { forma_pagamento } = req.body;
-    const dados = req.body;
+    const usuarioId = req.session.usuario.id;
+    const { forma_pagamento_id } = req.body;
 
-    console.log('🧾 Dados recebidos no checkout:', dados);
+    if (!forma_pagamento_id) return res.status(400).send('Selecione uma forma de pagamento.');
 
-    if (!forma_pagamento) {
-      console.log('⚠️ Nenhuma forma de pagamento selecionada!');
-      return res.status(400).send('Selecione uma forma de pagamento.');
-    }
+    // Pega o carrinho completo com preço correto (produto ou variação)
+    const [carrinho] = await db.query(`
+      SELECT 
+        c.produto_id,
+        c.variacao_id,
+        COALESCE(v.preco, p.preco) AS preco_unitario,
+        c.quantidade
+      FROM carrinho c
+      JOIN produtos p ON c.produto_id = p.id
+      LEFT JOIN variacoes_produto v ON c.variacao_id = v.id
+      WHERE c.usuario_id = ?
+    `, [usuarioId]);
 
-    // Coleta os produtos do carrinho
-    const produtosCarrinho = Object.keys(dados)
-      .filter(key => key.startsWith('quantidade_'))
-      .map(key => ({
-        id: key.split('_')[1],
-        quantidade: Number(dados[key])
-      }));
+    if (carrinho.length === 0) return res.status(400).send('Nenhum produto no carrinho.');
 
-    if (produtosCarrinho.length === 0) {
-      return res.status(400).send('Carrinho vazio.');
-    }
+    // Calcula total
+    const total = carrinho.reduce((acc, item) => acc + Number(item.preco_unitario) * item.quantidade, 0);
 
-    // Calcula o total
-    let total = 0;
-    for (const item of produtosCarrinho) {
-      const [[produto]] = await db.query('SELECT preco FROM produtos WHERE id = ?', [item.id]);
-      total += produto.preco * item.quantidade;
-    }
-
-    // Cria o pedido
+    // Cria pedido
     const [pedidoResult] = await db.query(
-      'INSERT INTO pedidos (usuario_id, data, total, forma_pagamento) VALUES (?, NOW(), ?, ?)',
-      [usuario.id, total, forma_pagamento]
+      'INSERT INTO pedidos (usuario_id, data_pedido, total, forma_pagamento_id) VALUES (?, NOW(), ?, ?)',
+      [usuarioId, total, forma_pagamento_id]
     );
-
     const pedidoId = pedidoResult.insertId;
 
-    // Insere os itens do pedido
-    for (const item of produtosCarrinho) {
-      await db.query(
-        'INSERT INTO itens_pedido (pedido_id, produto_id, quantidade) VALUES (?, ?, ?)',
-        [pedidoId, item.id, item.quantidade]
-      );
+    // Insere itens do pedido
+    for (const item of carrinho) {
+      await db.query(`
+        INSERT INTO itens_pedido (pedido_id, produto_id, variacao_id, quantidade, preco_unit)
+        VALUES (?, ?, ?, ?, ?)
+      `, [pedidoId, item.produto_id, item.variacao_id || null, item.quantidade, item.preco_unitario]);
     }
 
-    console.log('✅ Pedido finalizado com sucesso!');
+    // Limpa carrinho
+    await db.query('DELETE FROM carrinho WHERE usuario_id = ?', [usuarioId]);
+
     res.redirect('/loja/pedido-sucesso');
   } catch (err) {
     console.error('Erro ao finalizar pedido:', err);
-    res.status(500).send('Erro ao finalizar pedido.');
+    res.status(500).send('Erro ao finalizar pedido');
   }
 });
 
 // =====================
-// Página de sucesso
+// Página de sucesso do pedido
 // =====================
 router.get('/pedido-sucesso', autenticar, (req, res) => {
-  res.render('loja/pedido-sucesso');
+  res.render('loja/pedidoSucesso', { usuario: req.session.usuario });
 });
 
 // =====================
@@ -299,7 +435,7 @@ router.get('/pedidos', autenticar, async (req, res) => {
       SELECT p.id, p.data_pedido AS data, p.status, p.total, f.descricao AS forma_pagamento
       FROM pedidos p
       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
-      WHERE p.cliente_id = ?
+      WHERE p.usuario_id = ?
       ORDER BY p.data_pedido DESC
     `, [req.session.usuario.id]);
 
@@ -319,7 +455,7 @@ router.get('/pedidos/:id', autenticar, async (req, res) => {
       SELECT p.id, p.data_pedido AS data, p.status, p.total, f.descricao AS forma_pagamento
       FROM pedidos p
       JOIN forma_pagamento f ON p.forma_pagamento_id = f.id
-      WHERE p.id = ? AND p.cliente_id = ?
+      WHERE p.id = ? AND p.usuario_id = ?
     `, [pedidoId, req.session.usuario.id]);
 
     if (!pedido) return res.status(404).send('Pedido não encontrado.');
