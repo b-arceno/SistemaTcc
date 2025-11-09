@@ -4,6 +4,159 @@
   <meta charset="UTF-8">
   <title>Meu Perfil</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ====================== PERFIL ====================== */
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff8fb;
+    }
+
+    .perfil-container {
+      max-width: 650px;
+      margin: 80px auto;
+      background: #ffc0cb; /* mesma cor dos cards */
+      padding: 40px 50px;
+      border-radius: 30px;
+      box-shadow: 0 8px 20px rgba(217, 21, 92, 0.2); /* igual aos cards */
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #d9155c;
+      margin-bottom: 25px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    label {
+      font-weight: 600;
+      color: #700a32;
+      align-self: flex-start;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 20px;
+      border: 1px solid #f48bae;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #d9155c;
+      box-shadow: 0 0 8px rgba(217,21,92,0.3);
+    }
+
+    .alterar-senha-btn {
+      background: #e35b8f;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+
+    .alterar-senha-btn:hover {
+      background: #ff80ab;
+      transform: translateY(-2px);
+    }
+
+    #senha-section {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .senha-info {
+      font-size: 13px;
+      color: #700a32;
+      margin-bottom: 5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .toggle-senha {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #d9155c;
+      user-select: none;
+    }
+
+    .btn-salvar {
+      margin-top: 10px;
+      background: #d9155c;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .btn-salvar:hover {
+      background: #c2185b;
+      transform: translateY(-2px);
+    }
+
+    .excluir-container {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-excluir {
+      background: #ff7b9c;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-excluir:hover {
+      background: #e75480;
+      transform: translateY(-2px);
+    }
+
+    .voltar {
+      text-decoration: none;
+      color: #c2185b;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .voltar:hover {
+      color: #8c0f3d;
+    }
+  </style>
+</head>
 
 <body>
   <%- include('../partials/header') %>
@@ -25,30 +178,6 @@
 
         <label for="telefone">Telefone:</label>
         <input type="text" id="telefone" name="telefone" value="<%= usuario.telefone || '' %>">
-
-        <label for="endereco">Endereço:</label>
-
-        <label>CEP</label>
-        <input type="text" name="cep" value="<%= usuario.cep || '' %>" required />
-
-        <label>Rua</label>
-        <input type="text" name="rua" value="<%= usuario.rua || '' %>" required />
-
-        <label>Número</label>
-        <input type="text" name="numero" value="<%= usuario.numero || '' %>" required />
-
-        <label>Complemento</label>
-        <input type="text" name="complemento" value="<%= usuario.complemento || '' %>" />
-
-        <label>Bairro</label>
-        <input type="text" name="bairro" value="<%= usuario.bairro || '' %>" required />
-
-        <label>Cidade</label>
-        <input type="text" name="cidade" value="<%= usuario.cidade || '' %>" required />
-
-        <label>Estado</label>
-        <input type="text" name="estado" value="<%= usuario.estado || '' %>" required />
-
 
         <button type="button" class="alterar-senha-btn" onclick="toggleSenha()">Alterar Senha</button>
 

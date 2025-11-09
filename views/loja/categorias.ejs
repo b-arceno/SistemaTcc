@@ -4,165 +4,98 @@
   <meta charset="UTF-8" />
   <title>Categorias</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
     /* ================== PRODUTOS ================== */
-.page-title {
-  text-align: center;
-  font-size: 2.2rem;
-  color: #d9155c;
-  margin: 2.5rem 0;
-  font-weight: 700;
-}
+    .page-title {
+      text-align: center;
+      font-size: 2.2rem;
+      color: #d9155c; /* rosa intenso */
+      margin: 2.5rem 0;
+      font-weight: 700;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2.5rem;
-  padding: 0 2rem 4rem 2rem;
-  justify-items: center;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2.5rem;
+      padding: 0 2rem 4rem 2rem;
+      justify-items: center;
+    }
 
-/* Card do produto (mesmo estilo das categorias) */
-.categoria-card {
-  width: 100%;
-  max-width: 220px;
-  height: 180px;
-  background: #ffc0cb; /* rosa meigo */
-  border-radius: 30px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1.2rem;
-  box-shadow: 0 8px 20px rgba(217, 21, 92, 0.2);
-  transition: transform 0.3s, box-shadow 0.3s;
-  position: relative;
-  overflow: hidden;
-}
+    /* Card do produto (mesmo estilo das categorias) */
+    .categoria-card {
+      width: 100%;
+      max-width: 220px;
+      height: 180px;
+      background: #ffc0cb; /* rosa meigo */
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.2rem;
+      box-shadow: 0 8px 20px rgba(217, 21, 92, 0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
 
-.categoria-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 14px 30px rgba(217, 21, 92, 0.25);
-}
+    .categoria-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 14px 30px rgba(217, 21, 92, 0.25);
+    }
 
-.categoria-card h2 {
-  color: #f0297c;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
+    .categoria-card h2 {
+      color: #d9155c; /* rosa intenso */
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
 
-.categoria-card .price {
-  color: #fff;
-  font-weight: 600;
-  margin-bottom: 0.8rem;
-}
+    .categoria-card .btn {
+      background-color: #e35b8f;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      padding: 0.7rem 1.4rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(230, 120, 190, 0.2);
+    }
 
-.categoria-card .btn {
-  background-color: #e35b8f;
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  padding: 0.7rem 1.4rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-  text-decoration: none;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(230, 120, 190, 0.2);
-}
+    .categoria-card .btn:hover {
+      background-color: #ff80ab;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(230, 120, 190, 0.3);
+    }
 
-.categoria-card .btn:hover {
-  background-color: #ff80ab;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(230, 120, 190, 0.3);
-}
+    /* ================= RESPONSIVO ================= */
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+      .categoria-card {
+        height: 160px;
+      }
+    }
 
-/* ================= RESPONSIVO ================= */
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-  .categoria-card {
-    height: 160px;
-  }
-}
-
-@media (max-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 0 1rem;
-  }
-  .categoria-card {
-    max-width: 100%;
-    height: 150px;
-  }
-}
-
-/* ================= DETALHES DO PRODUTO ================= */
-.produto-detalhes {
-  max-width: 900px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(217, 21, 92, 0.1);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  align-items: flex-start;
-}
-
-.produto-detalhes img {
-  max-width: 400px;
-  width: 100%;
-  border-radius: 20px;
-  object-fit: cover;
-  flex: 1 1 40%;
-}
-
-.produto-info {
-  flex: 1 1 50%;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.produto-info h1 {
-  font-size: 2rem;
-  color: #d9155c;
-  font-weight: 700;
-}
-
-.produto-info .price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #e35b8f;
-}
-
-.produto-info p {
-  font-size: 1rem;
-  color: #333;
-  line-height: 1.5;
-}
-
-.produto-info .btn {
-  align-self: flex-start;
-}
-
-/* ================= RESPONSIVO DETALHES ================= */
-@media (max-width: 800px) {
-  .produto-detalhes {
-    flex-direction: column;
-    align-items: center;
-  }
-  .produto-info {
-    text-align: center;
-  }
-}
-
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+      }
+      .categoria-card {
+        max-width: 100%;
+        height: 150px;
+      }
+    }
   </style>
 </head>
 <body>

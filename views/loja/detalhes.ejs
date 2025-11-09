@@ -22,17 +22,17 @@
       width: 420px;
       height: 420px;
       object-fit: cover;
-      border-radius: 16px;
-      box-shadow: 0 0 12px rgba(217, 21, 92, 0.2);
+      border-radius: 25px;
+      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
     }
 
     .produto-info {
       flex: 1;
       max-width: 500px;
-      background: #fff;
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 0 25px rgba(217, 21, 92, 0.15);
+      background: #fffafc;
+      border-radius: 25px;
+      padding: 2.5rem;
+      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
     }
 
     .produto-info h1 {
@@ -55,9 +55,9 @@
 
     .price {
       color: #d9155c;
-      font-size: 1.6rem;
+      font-size: 1.7rem;
       font-weight: bold;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
     }
 
     .info-extra p {
@@ -69,30 +69,33 @@
       background-color: #d9155c;
       color: white;
       border: none;
-      padding: .8rem 1.5rem;
-      border-radius: 12px;
+      padding: .9rem 1.6rem;
+      border-radius: 15px;
       cursor: pointer;
       font-weight: 500;
+      font-size: 1rem;
       transition: 0.3s;
     }
 
     .btn:hover {
       background-color: #b80d4d;
+      transform: scale(1.03);
     }
 
     /* Avaliações */
     .avaliacoes-container {
       background: #fffafc;
-      border-radius: 20px;
+      border-radius: 25px;
       margin: 3rem auto;
       max-width: 800px;
       padding: 2rem;
-      box-shadow: 0 0 20px rgba(217, 21, 92, 0.15);
+      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
     }
 
     .avaliacoes-container h2 {
       color: #d9155c;
       margin-bottom: 1rem;
+      font-size: 1.6rem;
     }
 
     .avaliacao-item {
@@ -122,36 +125,48 @@
     .avaliar-form textarea,
     .avaliar-form select {
       width: 100%;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #f8cdd8;
-      padding: .6rem;
-      margin-top: .3rem;
+      padding: .7rem;
+      margin-top: .4rem;
       margin-bottom: 1rem;
       resize: none;
+      background: #fff;
     }
 
     .avaliar-form button {
       background: linear-gradient(135deg, #d9155c, #f48bae);
       border: none;
       color: white;
-      padding: .8rem 1.6rem;
+      padding: .9rem 1.8rem;
       border-radius: 20px;
       cursor: pointer;
       font-weight: 600;
+      transition: 0.3s;
     }
 
     .avaliar-form button:hover {
       background: #f48bae;
       color: #700a32;
+      transform: scale(1.05);
     }
 
     /* Seleção de variação */
     .form-variacao select {
       width: 100%;
-      padding: .6rem;
-      border-radius: 8px;
+      padding: .7rem;
+      border-radius: 10px;
       border: 1px solid #f8cdd8;
       margin-bottom: 1rem;
+      background: #fff;
+    }
+
+    .form-variacao input[type="number"] {
+      border-radius: 10px;
+      border: 1px solid #f8cdd8;
+      padding: .5rem;
+      text-align: center;
+      background: #fff;
     }
   </style>
 </head>
@@ -205,7 +220,6 @@
         <input type="number" name="quantidade" value="1" min="1" style="width: 60px; margin-left: .5rem;">
         <button type="submit" class="btn">Adicionar ao Carrinho</button>
       </form>
-
     </div>
   </main>
 
@@ -245,7 +259,7 @@
 
   <%- include('../partials/footer') %>
 
-  <!-- 🧁 Script: atualiza preço ao trocar variação -->
+  <!-- Atualiza preço ao trocar variação -->
   <script>
     const selectVariacao = document.getElementById('variacao');
     const precoElement = document.getElementById('preco');
@@ -256,7 +270,7 @@
         const option = selectVariacao.selectedOptions[0];
         const preco = option.getAttribute('data-preco');
         precoElement.textContent = `R$ ${parseFloat(preco).toFixed(2)}`;
-        precoHidden.value = preco; // valor enviado ao backend
+        precoHidden.value = preco;
       });
     }
   </script>

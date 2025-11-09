@@ -5,24 +5,33 @@
   <title>Meus Pedidos</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
+    /* ====================== CONTAINER GERAL ====================== */
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #fff8fb;
+      margin: 0;
+      padding: 0;
+    }
+
     .pedidos-container {
       max-width: 1000px;
-      margin: 60px auto;
-      background: #fff0f6; /* rosa claro */
-      border-radius: 25px;
-      padding: 40px;
+      margin: 80px auto;
+      background: #ffc0cb;
+      border-radius: 30px;
+      padding: 50px;
       text-align: center;
-      box-shadow: 0 8px 25px rgba(233,158,185,0.5);
+      box-shadow: 0 8px 25px rgba(217, 21, 92, 0.25);
     }
 
     h1 {
       color: #d9155c;
       font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 30px;
+      font-weight: 700;
+      margin-bottom: 35px;
       text-align: center;
     }
 
+    /* ====================== GRID DE PEDIDOS ====================== */
     .pedidos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -32,18 +41,19 @@
     .pedido-card {
       background: #fffafc;
       border-radius: 25px;
-      padding: 20px;
+      padding: 25px;
       text-align: left;
-      box-shadow: 0 4px 12px rgba(233,158,185,0.3);
+      box-shadow: 0 4px 12px rgba(233, 158, 185, 0.3);
       transition: 0.3s ease;
       position: relative;
     }
 
     .pedido-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 20px rgba(233,158,185,0.4);
+      transform: translateY(-6px);
+      box-shadow: 0 6px 18px rgba(217, 21, 92, 0.3);
     }
 
+    /* ====================== CABEÇALHO DO PEDIDO ====================== */
     .pedido-header {
       display: flex;
       justify-content: space-between;
@@ -51,17 +61,18 @@
       margin-bottom: 12px;
     }
 
-    .pedido-header h3 { 
-      color: #d9155c; 
-      font-weight: 600; 
+    .pedido-header h3 {
+      color: #d9155c;
+      font-weight: 600;
       font-size: 1.1rem;
     }
 
-    .pedido-header span { 
-      font-size: 0.95rem; 
-      color: #700a32; 
+    .pedido-header span {
+      font-size: 0.95rem;
+      color: #700a32;
     }
 
+    /* ====================== STATUS ====================== */
     .pedido-status {
       display: inline-block;
       margin-top: 10px;
@@ -79,6 +90,7 @@
     .pedido-status.entregue { background: #bbf7d0; color: #166534; }
     .pedido-status.cancelado { background: #fecaca; color: #991b1b; }
 
+    /* ====================== TOTAL E BOTÃO ====================== */
     .pedido-total {
       margin-top: 15px;
       font-weight: 700;
@@ -88,13 +100,13 @@
 
     .btn-detalhes {
       display: inline-block;
-      margin-top: 15px;
-      background: linear-gradient(135deg, #d9155c, #f48bae);
+      margin-top: 18px;
+      background: #e35b8f;
       color: #fff;
       font-weight: 600;
       border: none;
       border-radius: 25px;
-      padding: 10px 18px;
+      padding: 10px 22px;
       cursor: pointer;
       text-decoration: none;
       text-align: center;
@@ -102,16 +114,18 @@
     }
 
     .btn-detalhes:hover {
-      background: linear-gradient(135deg, #f48bae, #ffe6f0);
-      color: #700a32;
+      background: #ff80ab;
+      color: #fff;
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(233,158,185,0.3);
+      box-shadow: 0 6px 15px rgba(233, 158, 185, 0.3);
     }
 
+    /* ====================== NENHUM PEDIDO ====================== */
     .mensagem-vazia {
       color: #700a32;
       font-size: 1.1rem;
-      margin-top: 20px;
+      margin-top: 25px;
+      font-weight: 500;
     }
   </style>
 </head>

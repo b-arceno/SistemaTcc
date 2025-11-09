@@ -4,16 +4,195 @@
   <meta charset="UTF-8" />
   <title>Confeitaria - Home</title>
   <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fff0f6;
+      margin: 0;
+      color: #700a32;
+    }
+
+    a { text-decoration: none; }
+
+    /* ================= BANNER ================= */
+    .banner {
+      background:#ffc0cb;
+      text-align: center;
+      padding: 80px 20px;
+      border-radius: 35px;
+      box-shadow: 0 8px 25px rgba(233,158,185,0.3);
+      margin: 50px auto;
+      max-width: 1000px;
+      animation: fadeIn 1s ease;
+    }
+
+    .banner h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 3.2rem;
+      color: #d9155c;
+      margin-bottom: 15px;
+    }
+
+    .banner p {
+      font-size: 1.3rem;
+      color: #c2185b;
+      margin-bottom: 25px;
+    }
+
+    .btn-banner {
+      background: linear-gradient(135deg, #d9155c, #f48bae);
+      color: #fff;
+      padding: 14px 35px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 35px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(233,158,185,0.3);
+    }
+
+    .btn-banner:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #f48bae, #ffe6f0);
+      color: #700a32;
+    }
+
+    /* ================= SEÇÃO DE CARDS ================= */
+    .cards-section {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin: 60px auto;
+      max-width: 1000px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: #fff0f6;
+      border-radius: 35px;
+      box-shadow: 0 8px 25px rgba(233,158,185,0.3);
+      padding: 30px 25px;
+      flex: 1 1 420px;
+      min-height: 350px;
+      transition: 0.3s;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(233,158,185,0.4);
+    }
+
+    .card h2 {
+      color: #d9155c;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .card p {
+      color: #700a32;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      text-align: justify;
+    }
+
+    .card img {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 15px rgba(233,158,185,0.3);
+    }
+
+    /* ================= CONTATO ================= */
+    .contato-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+      font-weight: 500;
+      color: #700a32;
+      align-items: center;
+    }
+
+    .contato-info p {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+    }
+
+    .contato-info i {
+      color: #d9155c;
+    }
+
+    /* ================= ANIMAÇÕES ================= */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ================= RESPONSIVIDADE ================= */
+    @media (max-width: 900px) {
+      .banner h1 {
+        font-size: 2.5rem;
+      }
+      .banner p {
+        font-size: 1.1rem;
+      }
+      .cards-section {
+        flex-direction: column;
+        gap: 25px;
+      }
+      .card {
+        min-height: auto;
+      }
+    }
+  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
 
-  <main class="container">
+  <main>
+    <!-- BANNER -->
     <section class="banner">
-      <h1>Bem-vindo à nossa Confeitaria </h1>
-      <p>Delícias preparadas com carinho para você!</p>
+      <h1>Bem-vindo à nossa Confeitaria</h1>
+      <p>Delícias preparadas com carinho e um toque de amor!</p>
+      <a href="/loja/categorias" class="btn-banner">Faça seu pedido</a>
+    </section>
+
+    <!-- SOBRE + CONTATO -->
+    <section class="cards-section">
+      <!-- Card SOBRE -->
+      <div class="card">
+        <h2>Conheça nossa história</h2>
+        <img src="/imagens/foto-dona.png" alt="Dona da Confeitaria">
+        <p>
+          Nossa confeitaria nasceu do sonho da <strong>Luciane</strong>, apaixonada por criar doces e bolos que encantam. 
+          Cada receita é feita com ingredientes selecionados, muito carinho e dedicação. 
+          Aqui, cada cliente é parte da nossa história doce!
+        </p>
+      </div>
+
+      <!-- Card CONTATO -->
+      <div class="card">
+        <h2>Fale conosco</h2>
+        <div class="contato-info">
+          <p><i class="fas fa-map-marker-alt"></i> Rua Serafim Manoel de Souza, 457 – Araranguá</p>
+          <p><i class="fas fa-phone-alt"></i> (48) 99817-3326</p>
+          <p><i class="fas fa-envelope"></i> adm.ludoces@gmail.com</p>
+          <p><i class="fab fa-instagram"></i> @_ludoces_</p>
+        </div>
+      </div>
     </section>
   </main>
+
   <%- include('../partials/footer') %>
 </body>
 </html>

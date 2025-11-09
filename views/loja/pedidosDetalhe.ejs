@@ -5,13 +5,14 @@
   <title>Detalhes do Pedido #<%= pedido.id %></title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
+    /* ================= CONTAINER ================= */
     .detalhes-container {
       max-width: 900px;
       margin: 60px auto;
-      background: #fff0f6; /* fundo rosa claro */
+      background: #ffc0cb; /* mesma cor dos cards */
       padding: 40px;
-      border-radius: 25px;
-      box-shadow: 0 8px 25px rgba(233,158,185,0.5);
+      border-radius: 35px;
+      box-shadow: 0 8px 25px rgba(217, 21, 92, 0.25);
       text-align: left;
     }
 
@@ -30,6 +31,7 @@
       color: #700a32;
     }
 
+    /* ================= STATUS ================= */
     .pedido-status {
       padding: 6px 12px;
       border-radius: 12px;
@@ -44,57 +46,64 @@
     .pedido-status.entregue { background: #bbf7d0; color: #166534; }
     .pedido-status.cancelado { background: #fecaca; color: #991b1b; }
 
+    /* ================= TABELA ================= */
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0 10px;
       margin-top: 25px;
-      background: #fffafc;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(233,158,185,0.3);
+      background: transparent;
     }
 
-    th, td {
-      padding: 14px 12px;
-      text-align: left;
+    tr {
+      background: #fffafc;
+      border-radius: 25px;
+      box-shadow: 0 4px 12px rgba(233,158,185,0.25);
+      transition: 0.3s;
+    }
+
+    tr:hover {
+      background: #ffe6f0;
+      transform: scale(1.01);
     }
 
     th {
-      background-color: #f48bae; 
       color: #700a32; 
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      padding: 14px 12px;
+      text-align: left;
     }
 
     td {
-      background-color: #fff0f6;
+      padding: 14px 12px;
+      color: #700a32;
+      font-weight: 500;
     }
 
-    tr:nth-child(even) td {
-      background-color: #ffe6f0;
-    }
-
-    tr:hover td {
-      background-color: #fddde9;
-      transition: 0.2s;
-    }
-
+    /* ================= TOTAL ================= */
     .total-pedido {
       text-align: right;
       font-weight: 700;
       font-size: 1.2rem;
       margin-top: 15px;
       color: #d9155c;
+      background: #fffafc;
+      border-radius: 25px;
+      display: inline-block;
+      padding: 10px 20px;
+      box-shadow: 0 3px 10px rgba(233,158,185,0.25);
     }
 
+    /* ================= BOTÃO ================= */
     .btn-voltar {
       display: inline-block;
       margin-top: 25px;
       background: linear-gradient(135deg, #d9155c, #f48bae);
       color: #fff;
-      padding: 10px 20px;
-      border-radius: 25px;
+      padding: 12px 25px;
+      border-radius: 30px;
       text-decoration: none;
       font-weight: bold;
       transition: 0.3s ease;
@@ -103,6 +112,7 @@
     .btn-voltar:hover {
       background: linear-gradient(135deg, #f48bae, #ffe6f0);
       color: #700a32;
+      transform: scale(1.05);
     }
 
   </style>
@@ -139,15 +149,15 @@
               <tr>
                 <td><%= item.produto_nome %></td>
                 <td><%= item.quantidade %></td>
-                <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
-                <td>R$ <%= (item.quantidade * item.preco_unitario).toFixed(2) %></td>
+                <td>R$ <%= Number(item.preco_unitario || 0).toFixed(2) %></td>
+                <td>R$ <%= (item.quantidade * (item.preco_unitario || 0)).toFixed(2) %></td>
               </tr>
             <% }) %>
           </tbody>
         </table>
       <% } %>
 
-      <p class="total-pedido">Total: R$ <%= Number(pedido.total).toFixed(2) %></p>
+      <p class="total-pedido">Total: R$ <%= Number(pedido.total || 0).toFixed(2) %></p>
 
       <a href="/loja/pedidos" class="btn-voltar">⬅ Voltar para Meus Pedidos</a>
     </section>
