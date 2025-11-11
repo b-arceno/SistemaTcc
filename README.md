@@ -6,8 +6,7 @@ Este é um sistema de gerenciamento de usuários desenvolvido com Node.js, Expre
 ## Funcionalidades
 
 - Cadastro e login de usuários
-- Listagem de usuários
-- Criação, edição e exclusão de usuários
+- Criação, edição e exclusão de usuários/produtos
 - Diferenciação entre administradores e usuários comuns
 
 ## Tecnologias Utilizadas
@@ -37,35 +36,6 @@ Inicie o servidor com o comando:
 node app.js
 
 O servidor estará disponível em http://localhost:3000.
-
-## Estrutura do Projeto
-
-/CRUD
-│
-├── /views
-│   ├── /partials
-│   │   └── navbar.ejs
-│   ├── layout.ejs
-│   ├── create.ejs
-│   ├── edit.ejs
-│   ├── index.ejs
-│   ├── show.ejs
-│
-├── /controllers
-│   └── userController.js
-│
-├── /models
-│   └── userModel.js
-│
-├── /routes
-│   └── userRoutes.js
-│
-├── /config
-│   └── database.js
-│
-├── app.js
-├── package.json
-└── README.md
 
 Contribuição
 
