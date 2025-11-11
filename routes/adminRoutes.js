@@ -6,10 +6,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// ==================== UTIL ====================
+// ==================== FUNÇÃO UTIL ====================
 const parseNumber = (valor) => (isNaN(valor) ? 0 : Number(valor));
 
-// ==================== UPLOAD ====================
+// ==================== CONFIGURAÇÃO UPLOAD ====================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, '../public/uploads');
@@ -47,64 +47,80 @@ router.get('/', autenticar, isAdmin, async (req, res) => {
   }
 });
 
+
 // ==================== CATEGORIAS ====================
+
+// Listar categorias
 router.get('/categorias', autenticar, isAdmin, async (req, res) => {
   try {
     const [categorias] = await db.query('SELECT id, nome FROM categoria_produto');
     res.render('admin/categorias', { categorias, categoriaEdit: null });
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao listar categorias:', err);
     res.render('admin/categorias', { categorias: [], categoriaEdit: null });
   }
 });
 
+// Cadastrar categoria
 router.post('/categorias', autenticar, isAdmin, async (req, res) => {
   try {
     const { nome } = req.body;
-    if (!nome || nome.trim() === '') return res.status(400).send('Nome obrigatório');
+    if (!nome || nome.trim() === '') {
+      return res.status(400).send('O nome da categoria é obrigatório.');
+    }
     await db.query('INSERT INTO categoria_produto (nome) VALUES (?)', [nome]);
     res.redirect('/admin/categorias');
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao cadastrar categoria:', err);
     res.status(500).send('Erro ao cadastrar categoria');
   }
 });
 
+// Editar categoria (carregar dados)
 router.get('/categorias/editar/:id', autenticar, isAdmin, async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   try {
     const [[categoriaEdit]] = await db.query('SELECT * FROM categoria_produto WHERE id = ?', [id]);
     const [categorias] = await db.query('SELECT * FROM categoria_produto');
+    if (!categoriaEdit) return res.redirect('/admin/categorias');
+
     res.render('admin/categorias', { categorias, categoriaEdit });
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao carregar categoria para edição:', err);
     res.redirect('/admin/categorias');
   }
 });
 
+// Salvar edição
 router.post('/categorias/editar/:id', autenticar, isAdmin, async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   const { nome } = req.body;
-  if (!nome || nome.trim() === '') return res.status(400).send('Nome obrigatório');
+
   try {
+    if (!nome || nome.trim() === '') {
+      return res.status(400).send('O nome da categoria é obrigatório.');
+    }
+
     await db.query('UPDATE categoria_produto SET nome = ? WHERE id = ?', [nome, id]);
     res.redirect('/admin/categorias');
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao editar categoria:', err);
     res.status(500).send('Erro ao editar categoria');
   }
 });
 
+// Deletar categoria
 router.get('/categorias/deletar/:id', autenticar, isAdmin, async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   try {
     await db.query('DELETE FROM categoria_produto WHERE id = ?', [id]);
     res.redirect('/admin/categorias');
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao deletar categoria:', err);
     res.status(500).send('Erro ao deletar categoria');
   }
 });
+
 
 // ==================== PRODUTOS ====================
 router.get('/produtos', autenticar, isAdmin, async (req, res) => {
@@ -115,28 +131,61 @@ router.get('/produtos', autenticar, isAdmin, async (req, res) => {
       JOIN categoria_produto c ON p.categoria_id = c.id
       ORDER BY p.nome ASC
     `);
+
     const [categorias] = await db.query('SELECT id, nome FROM categoria_produto');
-    produtos.forEach(prod => prod.preco = parseNumber(prod.preco));
-    res.render('admin/produtos', { produtos, categorias });
+
+    res.render('admin/produtos', {
+      produtos,
+      categorias,
+      produtoEdit: null
+    });
   } catch (err) {
     console.error(err);
-    res.render('admin/produtos', { produtos: [], categorias: [] });
+    res.render('admin/produtos', {
+      produtos: [],
+      categorias: [],
+      produtoEdit: null
+    });
   }
 });
 
-router.post('/produtos', autenticar, isAdmin, upload.single('imagem'), async (req, res) => {
+// Editar produto (GET)
+router.get('/produtos/editar/:id', autenticar, isAdmin, async (req, res) => {
+  const id = req.params.id;
   try {
-    const { nome, preco, categoria_id, descricao } = req.body;
-    if (!nome || !preco || !categoria_id) return res.status(400).send('Campos obrigatórios faltando');
-    const precoNum = parseFloat(preco);
-    if (isNaN(precoNum) || precoNum <= 0) return res.status(400).send('Preço inválido');
-    const imagem = req.file ? req.file.filename : null;
+    const [[produtoEdit]] = await db.query('SELECT * FROM produtos WHERE id = ?', [id]);
 
+    const [produtos] = await db.query(`
+      SELECT p.id, p.nome, p.preco, p.categoria_id, p.imagem, p.descricao, c.nome AS categoria_nome
+      FROM produtos p
+      JOIN categoria_produto c ON p.categoria_id = c.id
+      ORDER BY p.nome ASC
+    `);
+
+    const [categorias] = await db.query('SELECT id, nome FROM categoria_produto');
+
+    res.render('admin/produtos', {
+      produtos,
+      categorias,
+      produtoEdit
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/admin/produtos');
+  }
+});
+// Cadastrar novo produto (POST)
+router.post('/produtos', autenticar, isAdmin, upload.single('imagem'), async (req, res) => {
+  const { nome, preco, categoria_id, descricao } = req.body;
+  const precoNum = parseFloat(preco);
+  const imagem = req.file ? req.file.filename : null;
+
+  try {
     await db.query(
-      `INSERT INTO produtos (nome, preco, categoria_id, descricao, imagem)
-       VALUES (?, ?, ?, ?, ?)`,
+      'INSERT INTO produtos (nome, preco, categoria_id, descricao, imagem) VALUES (?, ?, ?, ?, ?)',
       [nome, precoNum, categoria_id, descricao, imagem]
     );
+
     res.redirect('/admin/produtos');
   } catch (err) {
     console.error(err);
@@ -144,14 +193,48 @@ router.post('/produtos', autenticar, isAdmin, upload.single('imagem'), async (re
   }
 });
 
+
+// Editar produto (POST)
+router.post('/produtos/editar/:id', autenticar, isAdmin, upload.single('imagem'), async (req, res) => {
+  const id = req.params.id;
+  const { nome, preco, categoria_id, descricao } = req.body;
+  const precoNum = parseFloat(preco);
+
+  try {
+    const [[produto]] = await db.query('SELECT imagem FROM produtos WHERE id = ?', [id]);
+    let imagem = produto.imagem;
+
+    if (req.file) {
+      if (imagem) {
+        const caminhoAntigo = path.join(__dirname, '../public/uploads', imagem);
+        if (fs.existsSync(caminhoAntigo)) fs.unlinkSync(caminhoAntigo);
+      }
+      imagem = req.file.filename;
+    }
+
+    await db.query(
+      'UPDATE produtos SET nome=?, preco=?, categoria_id=?, descricao=?, imagem=? WHERE id=?',
+      [nome, precoNum, categoria_id, descricao, imagem, id]
+    );
+
+    res.redirect('/admin/produtos');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao atualizar produto');
+  }
+});
+
+// Deletar produto
 router.get('/produtos/deletar/:id', autenticar, isAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    const [produto] = await db.query('SELECT imagem FROM produtos WHERE id = ?', [id]);
-    if (produto.length && produto[0].imagem) {
-      const caminho = path.join(__dirname, '../public/uploads', produto[0].imagem);
+    const [[produto]] = await db.query('SELECT imagem FROM produtos WHERE id = ?', [id]);
+
+    if (produto && produto.imagem) {
+      const caminho = path.join(__dirname, '../public/uploads', produto.imagem);
       if (fs.existsSync(caminho)) fs.unlinkSync(caminho);
     }
+
     await db.query('DELETE FROM produtos WHERE id = ?', [id]);
     res.redirect('/admin/produtos');
   } catch (err) {
@@ -159,6 +242,7 @@ router.get('/produtos/deletar/:id', autenticar, isAdmin, async (req, res) => {
     res.status(500).send('Erro ao deletar produto');
   }
 });
+
 
 // ==================== PEDIDOS ====================
 router.get('/pedidos', autenticar, isAdmin, async (req, res) => {

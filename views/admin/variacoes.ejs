@@ -1,36 +1,42 @@
 <%- include('../partials/adminHeader', { titulo: 'Variações' }) %>
 
-<h1>Gerenciar Variações de Produtos</h1>
+<div class="content">
+  <h1>Gerenciar Variações de Produtos</h1>
 
-<a href="/admin/variacoes/adicionar" class="btn-add">➕ Adicionar Nova Variação</a>
+  <a href="/admin/variacoes/adicionar" class="link-add">Adicionar Nova Variação</a>
 
-<table class="admin-table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Produto</th>
-      <th>Variação</th>
-      <th>Preço (R$)</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (variacoes.length > 0) { %>
-      <% variacoes.forEach(v => { %>
-        <tr>
-          <td><%= v.id %></td>
-          <td><%= v.produto_nome %></td>
-          <td><%= v.nome %></td>
-          <td>R$ <%= Number(v.preco).toFixed(2) %></td>
-          <td>
-            <a href="/admin/variacoes/deletar/<%= v.id %>" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta variação?')">🗑️ Excluir</a>
-          </td>
-        </tr>
-      <% }) %>
-    <% } else { %>
-      <tr><td colspan="5">Nenhuma variação cadastrada.</td></tr>
-    <% } %>
-  </tbody>
-</table>
+  <table class="tabela-admin">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Produto</th>
+        <th>Variação</th>
+        <th>Preço (R$)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (variacoes.length > 0) { %>
+        <% variacoes.forEach(v => { %>
+          <tr>
+            <td><%= v.id %></td>
+            <td><%= v.produto_nome %></td>
+            <td><%= v.nome %></td>
+            <td>R$ <%= Number(v.preco).toFixed(2) %></td>
+            <td>
+              <a href="/admin/variacoes/deletar/<%= v.id %>" 
+                 class="btn btn-deletar" 
+                 onclick="return confirm('Tem certeza que deseja excluir esta variação?')">
+                 Excluir
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr><td colspan="5">Nenhuma variação cadastrada.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
 
 <%- include('../partials/adminFooter') %>

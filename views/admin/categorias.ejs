@@ -2,10 +2,22 @@
 
 <h1>Gerenciar Categorias</h1>
 
-<form class="form-categoria" action="/admin/categorias" method="POST">
-  <label for="nome">Nome da Categoria</label>
-  <input type="text" id="nome" name="nome" required>
-  <button type="submit" class="btn btn-cadastrar">Cadastrar</button>
+<form 
+  class="form-categoria"
+  action="<%= categoriaEdit ? '/admin/categorias/editar/' + categoriaEdit.id : '/admin/categorias' %>" 
+  method="POST"
+>
+  <label for="nome"><%= categoriaEdit ? 'Editar Categoria' : 'Nova Categoria' %></label>
+  <input 
+    type="text" 
+    id="nome" 
+    name="nome" 
+    value="<%= categoriaEdit ? categoriaEdit.nome : '' %>" 
+    required
+  >
+  <button type="submit" class="btn btn-cadastrar">
+    <%= categoriaEdit ? 'Salvar Alterações' : 'Cadastrar' %>
+  </button>
 </form>
 
 <div class="categorias-container">

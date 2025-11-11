@@ -1,23 +1,25 @@
 <%- include('../partials/adminHeader', { titulo: 'Adicionar Variação' }) %>
 
-<h1>Adicionar Variação de Produto</h1>
+<div class="content">
+  <h1>Adicionar Variação de Produto</h1>
 
-<form action="/admin/variacoes/adicionar" method="POST" class="form-admin">
-  <label for="produto_id">Produto:</label>
-  <select name="produto_id" id="produto_id" required>
-    <% produtos.forEach(p => { %>
-      <option value="<%= p.id %>"><%= p.nome %></option>
-    <% }) %>
-  </select>
+  <form action="/admin/variacoes/adicionar" method="POST" class="form-produto">
+    
+    <label for="produto_id">Produto:</label>
+    <select name="produto_id" id="produto_id" required>
+      <% produtos.forEach(p => { %>
+        <option value="<%= p.id %>"><%= p.nome %></option>
+      <% }) %>
+    </select>
 
-  <label for="nome">Nome da Variação (ex: 250g, 500g, 1kg):</label>
-  <input type="text" name="nome" id="nome" required>
+    <label for="nome">Nome da Variação (ex: 250g, 500g, 1kg):</label>
+    <input type="text" name="nome" id="nome" placeholder="Ex: 500g" required>
 
-  <label for="preco">Preço (R$):</label>
-  <input type="number" name="preco" id="preco" step="0.01" min="0" required>
+    <label for="preco">Preço (R$):</label>
+    <input type="number" name="preco" id="preco" step="0.01" min="0" placeholder="Ex: 12.50" required>
 
-  <button type="submit" class="btn-save">Salvar</button>
-</form>
+    <button type="submit" class="btn btn-cadastrar">Salvar</button>
+  </form>
+</div>
 
 <%- include('../partials/adminFooter') %>
-

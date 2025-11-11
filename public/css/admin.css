@@ -401,3 +401,20 @@ select[name="status"]:focus {
   box-shadow: 0 3px 10px rgba(217, 21, 92, 0.3);
   transform: scale(1.05);
 }
+/* ---------------------- LINK ADICIONAR VARIAÇÃO ---------------------- */
+.link-add {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #700a32;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  border-bottom: 2px solid #f48bae;
+  transition: 0.3s;
+}
+
+.link-add:hover {
+  color: #d9155c;
+  border-color: #d9155c;
+  transform: scale(1.05);
+}

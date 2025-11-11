@@ -2,41 +2,78 @@
 
 <h1>Gerenciar Produtos</h1>
 
-<form class="form-produto" action="/admin/produtos" method="POST" enctype="multipart/form-data">
+<form class="form-produto"
+      action="<%= produtoEdit ? `/admin/produtos/editar/${produtoEdit.id}` : '/admin/produtos' %>"
+      method="POST"
+      enctype="multipart/form-data">
+
   <label for="nome">Nome</label>
-  <input type="text" id="nome" name="nome" required>
+  <input type="text" id="nome" name="nome" 
+         value="<%= produtoEdit ? produtoEdit.nome : '' %>" required>
 
   <label for="preco">Preço</label>
-  <input type="number" id="preco" name="preco" step="0.01" required>
+  <input type="number" id="preco" name="preco" step="0.01" min="0" 
+         value="<%= produtoEdit ? produtoEdit.preco : '' %>" required>
 
-  <label for="categoria">Categoria</label>
-  <select id="categoria" name="categoria_id" required>
-    <% categorias.forEach(cat => { %>
-      <option value="<%= cat.id %>"><%= cat.nome %></option>
-    <% }) %>
+  <label for="categoria_id">Categoria</label>
+  <select id="categoria_id" name="categoria_id" required>
+    <% if (categorias && categorias.length > 0) { %>
+      <% categorias.forEach(cat => { %>
+        <option value="<%= cat.id %>" 
+          <%= produtoEdit && produtoEdit.categoria_id === cat.id ? 'selected' : '' %>>
+          <%= cat.nome %>
+        </option>
+      <% }) %>
+    <% } else { %>
+      <option disabled>Nenhuma categoria cadastrada</option>
+    <% } %>
   </select>
 
   <label for="imagem">Imagem</label>
   <input type="file" id="imagem" name="imagem" accept="image/*">
+  <% if (produtoEdit && produtoEdit.imagem) { %>
+    <p>Imagem atual:</p>
+    <img src="/uploads/<%= produtoEdit.imagem %>" 
+         alt="<%= produtoEdit.nome %>" width="100">
+  <% } %>
 
   <label for="descricao">Descrição</label>
-  <textarea id="descricao" name="descricao"></textarea>
+  <textarea id="descricao" name="descricao" rows="3">
+    <%= produtoEdit ? produtoEdit.descricao : '' %>
+  </textarea>
 
-  <button type="submit" class="btn btn-cadastrar">Cadastrar Produto</button>
+  <button type="submit" class="btn btn-cadastrar">
+    <%= produtoEdit ? 'Salvar Alterações' : 'Cadastrar Produto' %>
+  </button>
+
+  <% if (produtoEdit) { %>
+    <a href="/admin/produtos" class="btn btn-cancelar">Cancelar Edição</a>
+  <% } %>
 </form>
 
+<hr>
+
 <div class="produtos-container">
-  <% produtos.forEach(p => { %>
-    <div class="produto-card">
-      <img src="/uploads/<%= p.imagem %>" alt="<%= p.nome %>">
-      <h3><%= p.nome %></h3>
-      <p>R$ <%= Number(p.preco).toFixed(2) %></p>
-      <div class="card-btns">
-        <a href="/admin/produtos/editar/<%= p.id %>" class="btn btn-editar">Editar</a>
-        <a href="/admin/produtos/deletar/<%= p.id %>" class="btn btn-deletar">Excluir</a>
+  <% if (produtos && produtos.length > 0) { %>
+    <% produtos.forEach(p => { %>
+      <div class="produto-card">
+        <img src="/uploads/<%= p.imagem %>" alt="<%= p.nome %>">
+        <h3><%= p.nome %></h3>
+        <p>R$ <%= Number(p.preco).toFixed(2) %></p>
+        <p class="categoria">Categoria: <%= p.categoria_nome %></p>
+
+        <div class="card-btns">
+          <a href="/admin/produtos/editar/<%= p.id %>" class="btn btn-editar">Editar</a>
+          <a href="/admin/produtos/deletar/<%= p.id %>" class="btn btn-deletar"
+             onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+             Excluir
+          </a>
+        </div>
       </div>
-    </div>
-  <% }) %>
+    <% }) %>
+  <% } else { %>
+    <p class="sem-produtos">Nenhum produto cadastrado ainda.</p>
+  <% } %>
 </div>
 
 <%- include('../partials/adminFooter') %>
