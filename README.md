@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 # User Management System
 
-Este é um sistema de gerenciamento de usuários desenvolvido com Node.js, Express e MySQL. Ele permite a criação, leitura, atualização e exclusão (CRUD) de usuários, com uma interface web para administradores e usuários.
+Este é um sistema de gerenciamento de pedidos desenvolvido com Node.js, Express e MySQL. Ele permite a criação, leitura, atualização e exclusão (CRUD) de produtospara que o usuário realize determinados pedidos, com uma interface web para administradores e usuários.
 
 ## Funcionalidades
 
