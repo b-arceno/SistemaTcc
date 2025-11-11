@@ -1,8 +1,7 @@
-CREATE DATABASE confeitaria;
+-- ------------------ CRIAR BANCO ------------------
 USE confeitaria;
 
--- TABELAS AUXILIARES
-
+-- ------------------ TABELAS AUXILIARES ------------------
 CREATE TABLE tipo_usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(50) NOT NULL
@@ -34,12 +33,11 @@ CREATE TABLE categorias (
     descricao TEXT
 );
 
--- USUÁRIOS E CLIENTES
-
+-- ------------------ USUÁRIOS E CLIENTES ------------------
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     tipo_usuario_id INT NOT NULL,
     telefone VARCHAR(20),
@@ -63,29 +61,56 @@ CREATE TABLE clientes (
     telefone VARCHAR(20)
 );
 
--- PRODUTOS E CARRINHO
-
+-- ------------------ PRODUTOS E VARIAÇÕES ------------------
 CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
+    peso VARCHAR(50),
+    ingredientes TEXT,
+    disponibilidade VARCHAR(100) DEFAULT 'Disponível',
+    avaliacao DECIMAL(2,1) DEFAULT 5.0,
     preco DECIMAL(10,2) NOT NULL,
     categoria_id INT,
     imagem VARCHAR(255),
+    ativo TINYINT DEFAULT 1,
     FOREIGN KEY (categoria_id) REFERENCES categoria_produto(id)
 );
 
-CREATE TABLE carrinho (
+CREATE TABLE variacoes_produto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);
+
+-- ------------------ AVALIACOES ------------------
+CREATE TABLE avaliacoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
     produto_id INT NOT NULL,
-    quantidade INT NOT NULL,
+    nota DECIMAL(2,1) NOT NULL,
+    comentario TEXT,
+    data_avaliacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
--- PEDIDOS E ITENS
+-- ------------------ CARRINHO ------------------
+CREATE TABLE carrinho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    produto_id INT NOT NULL,
+    variacao_id INT,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10,2),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id),
+    FOREIGN KEY (variacao_id) REFERENCES variacoes_produto(id)
+);
 
+-- ------------------ PEDIDOS E ITENS ------------------
 CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
@@ -110,40 +135,18 @@ CREATE TABLE itens_pedido (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT,
     produto_id INT,
+    variacao_id INT,
     quantidade INT NOT NULL,
     preco_unit DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
-    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    FOREIGN KEY (produto_id) REFERENCES produtos(id),
+    FOREIGN KEY (variacao_id) REFERENCES variacoes_produto(id)
 );
 
--- TABELA DE SESSÕES (LOGIN)
-
+-- ------------------ SESSIONS ------------------
 CREATE TABLE sessions (
     session_id VARCHAR(128) PRIMARY KEY,
     expires INT UNSIGNED NOT NULL,
     data MEDIUMTEXT
 );
 
--- DADOS INICIAIS
-
-INSERT INTO tipo_usuario (descricao) VALUES 
-('Administrador'),
-('Cliente');
-
-INSERT INTO forma_pagamento (descricao) VALUES 
-('Cartão de Crédito'),
-('Pix'),
-('Boleto');
-
-INSERT INTO status_pedido (descricao) VALUES 
-('pendente'),
-('em preparo'),
-('finalizado'),
-('a caminho'),
-('entregue'),
-('cancelado');
-
-INSERT INTO status_pagamento (descricao) VALUES 
-('pendente'),
-('pago'),
-('cancelado');
