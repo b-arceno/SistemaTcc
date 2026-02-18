@@ -27,12 +27,6 @@ CREATE TABLE categoria_produto (
     nome VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE categorias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT
-);
-
 -- ------------------ USUÁRIOS E CLIENTES ------------------
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,13 +46,6 @@ CREATE TABLE usuarios (
     cidade VARCHAR(100),
     estado VARCHAR(50),
     FOREIGN KEY (tipo_usuario_id) REFERENCES tipo_usuario(id)
-);
-
-CREATE TABLE clientes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    telefone VARCHAR(20)
 );
 
 -- ------------------ PRODUTOS E VARIAÇÕES ------------------
