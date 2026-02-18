@@ -91,7 +91,7 @@ router.post('/esqueceu-senha', async (req, res) => {
     const token = crypto.randomBytes(20).toString('hex');
     const expira = new Date(Date.now() + 3600000); // 1 hora
 
-    await db.query('UPDATE usuarios SET reset_token=?, reset_expira=? WHERE email=?', [
+    await db.query('UPDATE usuarios SET reset_token=?, reset_token_expira=? WHERE email=?', [
       token,
       expira,
       email
@@ -126,7 +126,7 @@ router.get('/reset/:token', async (req, res) => {
   const { token } = req.params;
 
   const [usuarios] = await db.query(
-    'SELECT * FROM usuarios WHERE reset_token=? AND reset_expira > NOW()',
+    'SELECT * FROM usuarios WHERE reset_token=? AND reset_token_expira > NOW()',
     [token]
   );
 
@@ -146,7 +146,7 @@ router.post('/reset/:token', async (req, res) => {
   }
 
   const [usuarios] = await db.query(
-    'SELECT * FROM usuarios WHERE reset_token=? AND reset_expira > NOW()',
+    'SELECT * FROM usuarios WHERE reset_token=? AND reset_token_expira > NOW()',
     [token]
   );
 
@@ -157,7 +157,7 @@ router.post('/reset/:token', async (req, res) => {
   const senhaHash = await bcrypt.hash(senha, 10);
 
   await db.query(
-    'UPDATE usuarios SET senha=?, reset_token=NULL, reset_expira=NULL WHERE id=?',
+    'UPDATE usuarios SET senha=?, reset_token=NULL, reset_token_expira=NULL WHERE id=?',
     [senhaHash, usuarios[0].id]
   );
 

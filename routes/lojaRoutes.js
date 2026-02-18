@@ -12,7 +12,8 @@ router.get('/', autenticar, async (req, res) => {
     const [produtos] = await db.query(`
       SELECT p.*, c.nome AS categoria_nome 
       FROM produtos p
-      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN categoria_produto c ON p.categoria_id = c.id
+      WHERE p.ativo = 1
       LIMIT 6
     `);
     produtos.forEach(p => p.preco = Number(p.preco));
@@ -28,7 +29,7 @@ router.get('/', autenticar, async (req, res) => {
 // =====================
 router.get('/categorias', autenticar, async (req, res) => {
   try {
-    const [categorias] = await db.query('SELECT * FROM categorias ORDER BY nome');
+  const [categorias] = await db.query('SELECT id, nome FROM categoria_produto ORDER BY nome');
     res.render('loja/categorias', { categorias, usuario: req.session.usuario });
   } catch (err) {
     console.error('Erro ao carregar categorias:', err);
@@ -44,10 +45,10 @@ router.get('/categorias/:id', autenticar, async (req, res) => {
     const categoriaId = Number(req.params.id);
     if (isNaN(categoriaId)) return res.status(400).send('Categoria inválida.');
 
-    const [[categoria]] = await db.query('SELECT * FROM categorias WHERE id = ?', [categoriaId]);
+  const [[categoria]] = await db.query('SELECT id, nome FROM categoria_produto WHERE id = ?', [categoriaId]);
     if (!categoria) return res.status(404).send('Categoria não encontrada.');
 
-    const [produtos] = await db.query('SELECT * FROM produtos WHERE categoria_id = ?', [categoriaId]);
+  const [produtos] = await db.query('SELECT * FROM produtos WHERE categoria_id = ? AND ativo = 1', [categoriaId]);
     produtos.forEach(p => p.preco = Number(p.preco));
 
     res.render('loja/produtos', { categoria, produtos, usuario: req.session.usuario });
@@ -66,7 +67,7 @@ router.get('/produtos', autenticar, async (req, res) => {
     const limit = 12;
     const offset = (page - 1) * limit;
 
-    const [produtos] = await db.query('SELECT * FROM produtos LIMIT ? OFFSET ?', [limit, offset]);
+  const [produtos] = await db.query('SELECT * FROM produtos WHERE ativo = 1 LIMIT ? OFFSET ?', [limit, offset]);
     produtos.forEach(p => p.preco = Number(p.preco));
 
     res.render('loja/produtos', { produtos, page, categoria: null, usuario: req.session.usuario });
@@ -90,12 +91,12 @@ router.get('/produtos/:id', autenticar, async (req, res) => {
         COALESCE(AVG(a.nota), 0) AS avaliacao_media
       FROM produtos p
       LEFT JOIN avaliacoes a ON a.produto_id = p.id
-      WHERE p.id = ?
+      WHERE p.id = ? AND p.ativo = 1
       GROUP BY p.id
     `, [id]);
 
-    if (!produto) {
-      return res.status(404).send('Produto não encontrado.');
+    if (!produto || produto.ativo === 0) {
+      return res.status(404).send('Produto não encontrado ou está desativado.');
     }
 
     // Garante que o preço seja numérico
@@ -219,7 +220,7 @@ router.post('/carrinho/adicionar', autenticar, async (req, res) => {
 
   try {
     // Busca o produto principal
-    const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ?', [produtoId]);
+  const [[produto]] = await db.query('SELECT * FROM produtos WHERE id = ? AND ativo = 1', [produtoId]);
     if (!produto) {
       return res.status(404).send('Produto não encontrado.');
     }
@@ -439,10 +440,64 @@ router.get('/pedidos', autenticar, async (req, res) => {
       ORDER BY p.data_pedido DESC
     `, [req.session.usuario.id]);
 
+    pedidos.forEach(p => p.total = Number(p.total));
     res.render('loja/pedidos', { pedidos, usuario: req.session.usuario });
   } catch (err) {
     console.error('Erro ao carregar pedidos:', err);
     res.status(500).send('Erro ao carregar pedidos.');
+  }
+});
+
+// Relatórios do usuário
+// =====================
+router.get('/relatorios', autenticar, async (req, res) => {
+  try {
+    // Relatório de vendas do usuário por data
+    const [vendasUsuario] = await db.query(`
+      SELECT 
+        DATE(p.data_pedido) AS data, 
+        COUNT(*) AS total_pedidos, 
+        SUM(p.total) AS total_vendas
+      FROM pedidos p
+      WHERE p.usuario_id = ?
+      GROUP BY DATE(p.data_pedido)
+      ORDER BY DATE(p.data_pedido) DESC
+    `, [req.session.usuario.id]);
+
+    // Produtos mais comprados pelo usuário
+    const [produtosComprados] = await db.query(`
+      SELECT 
+        pr.id,
+        pr.nome AS produto_nome,
+        pr.imagem,
+        c.nome AS categoria_nome,
+        SUM(i.quantidade) AS total_quantidade,
+        i.preco_unit AS preco_unitario,
+        SUM(i.quantidade * i.preco_unit) AS total_gasto,
+        COUNT(DISTINCT i.pedido_id) AS total_compras
+      FROM itens_pedido i
+      JOIN produtos pr ON i.produto_id = pr.id
+      JOIN categoria_produto c ON pr.categoria_id = c.id
+      JOIN pedidos p ON i.pedido_id = p.id
+      WHERE p.usuario_id = ?
+      GROUP BY pr.id, i.preco_unit
+      ORDER BY SUM(i.quantidade * i.preco_unit) DESC
+    `, [req.session.usuario.id]);
+
+    vendasUsuario.forEach(v => v.total_vendas = Number(v.total_vendas));
+    produtosComprados.forEach(p => {
+      p.preco_unitario = Number(p.preco_unitario);
+      p.total_gasto = Number(p.total_gasto);
+    });
+
+    res.render('loja/relatorios', { 
+      usuario: req.session.usuario, 
+      vendasUsuario, 
+      produtosComprados 
+    });
+  } catch (err) {
+    console.error('Erro ao carregar relatórios:', err);
+    res.status(500).send('Erro ao carregar relatórios.');
   }
 });
 

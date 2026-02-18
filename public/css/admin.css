@@ -224,11 +224,12 @@ body {
 .tabela-admin {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  background: #fff;
+  margin-top: 25px;
+  background: #fffafc;
   border-radius: 25px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(233, 158, 185, 0.3);
+  box-shadow: 0 4px 12px rgba(233, 158, 185, 0.4);
+  font-size: 15px;
 }
 
 .tabela-admin th,
@@ -238,18 +239,19 @@ body {
 }
 
 .tabela-admin th {
-  background-color: #d9155c;
-  color: #fff;
-  font-size: 15px;
+  background-color: #f48bae;
+  color: #700a32;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .tabela-admin tr:nth-child(even) {
-  background-color: #fddde9;
+  background-color: #fff0f6;
 }
 
 .tabela-admin tr:hover {
-  background-color: #f48bae;
-  transform: scale(1.01);
+  background-color: #ffe6f0;
   transition: 0.2s;
 }
 
@@ -347,41 +349,6 @@ select[name="status"]:focus {
   border-color: #d9155c;
   box-shadow: 0 0 6px rgba(217, 21, 92, 0.3);
   outline: none;
-}
-
-/* ---------------------- TABELAS (PEDIDOS) ---------------------- */
-.tabela-admin {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 25px;
-  background: #fffafc;
-  border-radius: 25px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(233, 158, 185, 0.4);
-  font-size: 15px;
-}
-
-.tabela-admin th,
-.tabela-admin td {
-  padding: 12px 15px;
-  text-align: left;
-}
-
-.tabela-admin th {
-  background-color: #f48bae;
-  color: #700a32;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.tabela-admin tr:nth-child(even) {
-  background-color: #fff0f6;
-}
-
-.tabela-admin tr:hover {
-  background-color: #ffe6f0;
-  transition: 0.2s;
 }
 
 /* ---------------------- BOTÃO "VER" (AÇÕES NA TABELA) ---------------------- */

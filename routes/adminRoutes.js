@@ -126,7 +126,7 @@ router.get('/categorias/deletar/:id', autenticar, isAdmin, async (req, res) => {
 router.get('/produtos', autenticar, isAdmin, async (req, res) => {
   try {
     const [produtos] = await db.query(`
-      SELECT p.id, p.nome, p.preco, p.categoria_id, p.imagem, p.descricao, c.nome AS categoria_nome
+      SELECT p.id, p.nome, p.preco, p.categoria_id, p.imagem, p.descricao, p.ativo, c.nome AS categoria_nome
       FROM produtos p
       JOIN categoria_produto c ON p.categoria_id = c.id
       ORDER BY p.nome ASC
@@ -153,10 +153,10 @@ router.get('/produtos', autenticar, isAdmin, async (req, res) => {
 router.get('/produtos/editar/:id', autenticar, isAdmin, async (req, res) => {
   const id = req.params.id;
   try {
-    const [[produtoEdit]] = await db.query('SELECT * FROM produtos WHERE id = ?', [id]);
+  const [[produtoEdit]] = await db.query('SELECT * FROM produtos WHERE id = ?', [id]);
 
     const [produtos] = await db.query(`
-      SELECT p.id, p.nome, p.preco, p.categoria_id, p.imagem, p.descricao, c.nome AS categoria_nome
+      SELECT p.id, p.nome, p.preco, p.categoria_id, p.imagem, p.descricao, p.ativo, c.nome AS categoria_nome
       FROM produtos p
       JOIN categoria_produto c ON p.categoria_id = c.id
       ORDER BY p.nome ASC
@@ -169,6 +169,21 @@ router.get('/produtos/editar/:id', autenticar, isAdmin, async (req, res) => {
       categorias,
       produtoEdit
     });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/admin/produtos');
+  }
+});
+
+// Toggle ativação do produto (ativar/desativar)
+router.get('/produtos/toggle/:id', autenticar, isAdmin, async (req, res) => {
+  const id = req.params.id;
+  try {
+    const [[produto]] = await db.query('SELECT ativo FROM produtos WHERE id = ?', [id]);
+    if (!produto) return res.redirect('/admin/produtos');
+    const novoEstado = produto.ativo === 1 ? 0 : 1;
+    await db.query('UPDATE produtos SET ativo = ? WHERE id = ?', [novoEstado, id]);
+    res.redirect('/admin/produtos');
   } catch (err) {
     console.error(err);
     res.redirect('/admin/produtos');
@@ -228,14 +243,24 @@ router.post('/produtos/editar/:id', autenticar, isAdmin, upload.single('imagem')
 router.get('/produtos/deletar/:id', autenticar, isAdmin, async (req, res) => {
   const id = req.params.id;
   try {
+    // Busca produto e imagem
     const [[produto]] = await db.query('SELECT imagem FROM produtos WHERE id = ?', [id]);
 
-    if (produto && produto.imagem) {
-      const caminho = path.join(__dirname, '../public/uploads', produto.imagem);
-      if (fs.existsSync(caminho)) fs.unlinkSync(caminho);
+    // Verifica se produto está presente em itens de pedidos (histórico)
+    const [[pedidoRef]] = await db.query('SELECT COUNT(*) AS cnt FROM itens_pedido WHERE produto_id = ?', [id]);
+    if (pedidoRef && pedidoRef.cnt > 0) {
+      // Se houver histórico, não deletar: desativar o produto para preservação de histórico
+      await db.query('UPDATE produtos SET ativo = 0 WHERE id = ?', [id]);
+      // Remove do carrinho para evitar compras futuras
+      await db.query('DELETE FROM carrinho WHERE produto_id = ?', [id]);
+      return res.redirect('/admin/produtos');
     }
 
-    await db.query('DELETE FROM produtos WHERE id = ?', [id]);
+    // Se não houver histórico, simplesmente desative (mantendo registros) e limpe o carrinho
+    await db.query('UPDATE produtos SET ativo = 0 WHERE id = ?', [id]);
+    await db.query('DELETE FROM carrinho WHERE produto_id = ?', [id]);
+
+    // Não removemos imagem nem outras tabelas para manter histórico; apenas desativamos
     res.redirect('/admin/produtos');
   } catch (err) {
     console.error(err);
@@ -319,7 +344,7 @@ router.post('/pedidos/:id/status', autenticar, isAdmin, async (req, res) => {
 router.get('/relatorios', autenticar, isAdmin, async (req, res) => {
   try {
     const [vendas] = await db.query(`
-      SELECT DATE(data_pedido) AS data, SUM(total) AS total_vendas
+      SELECT DATE(data_pedido) AS data, SUM(total) AS total_vendas, COUNT(*) AS total_pedidos
       FROM pedidos
       GROUP BY DATE(data_pedido)
       ORDER BY DATE(data_pedido) DESC
@@ -331,10 +356,31 @@ router.get('/relatorios', autenticar, isAdmin, async (req, res) => {
       GROUP BY status
     `);
 
-    res.render('admin/relatorios', { vendas, status });
+    // Relatório detalhado de produtos vendidos
+    const [produtosVendidos] = await db.query(`
+      SELECT 
+        pr.id,
+        pr.nome AS produto_nome,
+        pr.imagem,
+        SUM(i.quantidade) AS total_quantidade,
+        i.preco_unit AS preco_unitario,
+        SUM(i.quantidade * i.preco_unit) AS total_venda,
+        COUNT(DISTINCT i.pedido_id) AS total_pedidos
+      FROM itens_pedido i
+      JOIN produtos pr ON i.produto_id = pr.id
+      GROUP BY pr.id, i.preco_unit
+      ORDER BY SUM(i.quantidade * i.preco_unit) DESC
+    `);
+
+    produtosVendidos.forEach(p => {
+      p.preco_unitario = parseNumber(p.preco_unitario);
+      p.total_venda = parseNumber(p.total_venda);
+    });
+
+    res.render('admin/relatorios', { vendas, status, produtosVendidos });
   } catch (err) {
     console.error(err);
-    res.render('admin/relatorios', { vendas: [], status: [] });
+    res.render('admin/relatorios', { vendas: [], status: [], produtosVendidos: [] });
   }
 });
 

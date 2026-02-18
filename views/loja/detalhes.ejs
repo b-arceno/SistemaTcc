@@ -4,178 +4,30 @@
   <meta charset="UTF-8" />
   <title><%= produto.nome %></title>
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    body {
-      background-color: #fff0f6;
-    }
-
-    .produto-detalhe {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3rem;
-      padding: 3rem;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .produto-imagem img {
-      width: 420px;
-      height: 420px;
-      object-fit: cover;
-      border-radius: 25px;
-      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
-    }
-
-    .produto-info {
-      flex: 1;
-      max-width: 500px;
-      background: #fffafc;
-      border-radius: 25px;
-      padding: 2.5rem;
-      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
-    }
-
-    .produto-info h1 {
-      margin-bottom: .8rem;
-      font-size: 2rem;
-      color: #d9155c;
-    }
-
-    .avaliacao {
-      color: #ff9eaa;
-      font-size: 1.3rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .avaliacao span {
-      color: #555;
-      margin-left: .5rem;
-      font-size: 0.95rem;
-    }
-
-    .price {
-      color: #d9155c;
-      font-size: 1.7rem;
-      font-weight: bold;
-      margin-bottom: 1.2rem;
-    }
-
-    .info-extra p {
-      margin: .4rem 0;
-      color: #444;
-    }
-
-    .btn {
-      background-color: #d9155c;
-      color: white;
-      border: none;
-      padding: .9rem 1.6rem;
-      border-radius: 15px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 1rem;
-      transition: 0.3s;
-    }
-
-    .btn:hover {
-      background-color: #b80d4d;
-      transform: scale(1.03);
-    }
-
-    /* Avaliações */
-    .avaliacoes-container {
-      background: #fffafc;
-      border-radius: 25px;
-      margin: 3rem auto;
-      max-width: 800px;
-      padding: 2rem;
-      box-shadow: 0 6px 25px rgba(217, 21, 92, 0.15);
-    }
-
-    .avaliacoes-container h2 {
-      color: #d9155c;
-      margin-bottom: 1rem;
-      font-size: 1.6rem;
-    }
-
-    .avaliacao-item {
-      border-bottom: 1px solid #f8d7da;
-      padding: 1rem 0;
-    }
-
-    .avaliacao-item strong {
-      color: #700a32;
-    }
-
-    .avaliacao-item small {
-      color: #999;
-      font-size: 0.85rem;
-    }
-
-    .avaliar-form {
-      margin-top: 2rem;
-      text-align: left;
-    }
-
-    .avaliar-form label {
-      color: #700a32;
-      font-weight: 600;
-    }
-
-    .avaliar-form textarea,
-    .avaliar-form select {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid #f8cdd8;
-      padding: .7rem;
-      margin-top: .4rem;
-      margin-bottom: 1rem;
-      resize: none;
-      background: #fff;
-    }
-
-    .avaliar-form button {
-      background: linear-gradient(135deg, #d9155c, #f48bae);
-      border: none;
-      color: white;
-      padding: .9rem 1.8rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-    }
-
-    .avaliar-form button:hover {
-      background: #f48bae;
-      color: #700a32;
-      transform: scale(1.05);
-    }
-
-    /* Seleção de variação */
-    .form-variacao select {
-      width: 100%;
-      padding: .7rem;
-      border-radius: 10px;
-      border: 1px solid #f8cdd8;
-      margin-bottom: 1rem;
-      background: #fff;
-    }
-
-    .form-variacao input[type="number"] {
-      border-radius: 10px;
-      border: 1px solid #f8cdd8;
-      padding: .5rem;
-      text-align: center;
-      background: #fff;
-    }
-  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
 
   <main class="container produto-detalhe">
     <div class="produto-imagem">
-      <img src="<%= produto.imagem %>" alt="<%= produto.nome %>">
+      <%
+        let imagemPath;
+        if (produto.imagem) {
+          const img = String(produto.imagem);
+          if (/^https?:\/\//i.test(img)) {
+            imagemPath = img; // full URL
+          } else if (img.startsWith('/')) {
+            imagemPath = img; // already absolute path
+          } else if (img.startsWith('uploads/') ) {
+            imagemPath = '/' + img;
+          } else {
+            imagemPath = '/uploads/' + img; // filename only
+          }
+        } else {
+          imagemPath = '/imagens/image.png';
+        }
+      %>
+      <img src="<%= imagemPath %>" alt="<%= produto.nome %>">
     </div>
 
     <div class="produto-info">

@@ -17,7 +17,7 @@ exports.produtosPorCategoria = (req, res) => {
     SELECT p.*, c.nome AS categoria_nome
     FROM produtos p
     JOIN categoria_produto c ON p.categoria_id = c.id
-    WHERE p.categoria_id = ?
+    WHERE p.categoria_id = ? AND p.ativo = 1
   `;
 
   db.query(sql, [categoriaId], (err, produtos) => {
@@ -45,7 +45,7 @@ exports.detalhesProduto = (req, res) => {
     SELECT p.*, c.nome AS categoria_nome
     FROM produtos p
     JOIN categoria_produto c ON p.categoria_id = c.id
-    WHERE p.id = ?
+    WHERE p.id = ? AND p.ativo = 1
   `;
 
   db.query(sql, [produtoId], (err, resultados) => {
@@ -68,24 +68,32 @@ exports.verCarrinho = (req, res) => {
 
 // Adiciona produto ao carrinho
 exports.adicionarAoCarrinho = (req, res) => {
-  const { produtoId, nome, preco, quantidade } = req.body;
-  if (!produtoId || !nome || !preco || !quantidade) return res.status(400).send('Dados do produto inválidos');
+  const { produtoId, quantidade } = req.body;
+  if (!produtoId || !quantidade) return res.status(400).send('Dados do produto inválidos');
 
-  if (!req.session.carrinho) req.session.carrinho = [];
+  // Buscar produto no DB e verificar ativo
+  db.query('SELECT id, nome, preco, imagem, ativo FROM produtos WHERE id = ?', [produtoId], (err, results) => {
+    if (err) return res.status(500).send('Erro ao adicionar ao carrinho');
+    const produto = results[0];
+    if (!produto || produto.ativo === 0) return res.status(404).send('Produto não encontrado ou está desativado');
 
-  const existente = req.session.carrinho.find(p => p.produtoId == produtoId);
-  if (existente) {
-    existente.quantidade += parseInt(quantidade, 10);
-  } else {
-    req.session.carrinho.push({
-      produtoId,
-      nome,
-      preco: parseFloat(preco),
-      quantidade: parseInt(quantidade, 10)
-    });
-  }
+    if (!req.session.carrinho) req.session.carrinho = [];
 
-  res.redirect('/loja/carrinho');
+    const existente = req.session.carrinho.find(p => p.produtoId == produtoId);
+    if (existente) {
+      existente.quantidade += parseInt(quantidade, 10);
+    } else {
+      req.session.carrinho.push({
+        produtoId: produto.id,
+        nome: produto.nome,
+        preco: Number(produto.preco),
+        imagem: produto.imagem,
+        quantidade: parseInt(quantidade, 10)
+      });
+    }
+
+    res.redirect('/loja/carrinho');
+  });
 };
 
 // Remove item do carrinho
@@ -149,7 +157,7 @@ exports.finalizarPedido = async (req, res) => {
       pedidoId,
       parseInt(p.produtoId, 10),
       parseInt(p.quantidade, 10),
-      parseFloat(p.preco)
+        parseFloat(p.preco)
     ]);
 
     if (valores.length > 0) {

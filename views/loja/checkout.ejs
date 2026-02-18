@@ -4,198 +4,6 @@
   <meta charset="UTF-8">
   <title>Checkout</title>
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    /* ================= CHECKOUT ================= */
-    .checkout-container {
-      max-width: 900px;
-      margin: 60px auto;
-      background: #ffc0cb; /* mesma cor dos cards */
-      padding: 40px;
-      border-radius: 35px;
-      box-shadow: 0 8px 25px rgba(217, 21, 92, 0.25);
-    }
-
-    h1 {
-      color: #d9155c;
-      font-size: 28px;
-      margin-bottom: 30px;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    /* ================= LISTA DE PRODUTOS ================= */
-    .produtos-lista {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 15px;
-    }
-
-    .produtos-lista th {
-      color: #700a32;
-      text-transform: uppercase;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-      text-align: left;
-      padding-bottom: 10px;
-    }
-
-    .produtos-lista tr {
-      background: #fffafc;
-      border-radius: 35px;
-      box-shadow: 0 3px 10px rgba(233,158,185,0.3);
-      transition: 0.3s;
-    }
-
-    /* arredonda os cantos da “tabela” */
-    .produtos-lista tr:first-child td:first-child {
-      border-top-left-radius: 35px;
-    }
-    .produtos-lista tr:first-child td:last-child {
-      border-top-right-radius: 35px;
-    }
-    .produtos-lista tr:last-child td:first-child {
-      border-bottom-left-radius: 35px;
-    }
-    .produtos-lista tr:last-child td:last-child {
-      border-bottom-right-radius: 35px;
-    }
-
-    .produtos-lista tr:hover {
-      transform: scale(1.01);
-      background: #ffe6f0;
-    }
-
-    .produtos-lista td {
-      padding: 18px 15px;
-      vertical-align: middle;
-      border: none;
-      color: #700a32;
-      font-weight: 500;
-    }
-
-    .produto-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .produto-info img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 25px;
-      box-shadow: 0 3px 6px rgba(178,62,178,0.15);
-      border: 2px solid #f48bae;
-      background: #fff;
-    }
-
-    .produto-info span {
-      font-weight: 600;
-      color: #700a32;
-      font-size: 1rem;
-    }
-
-    .preco {
-      text-align: right;
-      font-weight: 700;
-      color: #d9155c;
-      font-size: 1.1rem;
-    }
-
-    .total-container {
-      text-align: right;
-      margin-top: 25px;
-      font-size: 1.3rem;
-      color: #d9155c;
-      font-weight: 700;
-      background: #fffafc;
-      border-radius: 35px;
-      padding: 15px 20px;
-      box-shadow: 0 3px 12px rgba(233,158,185,0.25);
-      display: inline-block;
-    }
-
-    /* ================= FORMAS DE PAGAMENTO ================= */
-    .formas-pagamento {
-      margin-top: 35px;
-      text-align: center;
-    }
-
-    .formas-pagamento p {
-      color: #700a32;
-      font-weight: 700;
-      margin-bottom: 20px;
-      font-size: 18px;
-    }
-
-    .formas-opcoes {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .formas-pagamento label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fffafc;
-      border: 2px solid #f48bae;
-      padding: 14px 28px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: 0.3s;
-      font-weight: 600;
-      color: #700a32;
-      box-shadow: 0 2px 8px rgba(233,158,185,0.2);
-      min-width: 160px;
-    }
-
-    .formas-pagamento input[type="radio"] {
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border: 2px solid #f48bae;
-      border-radius: 50%;
-      margin-right: 10px;
-      transition: all 0.2s;
-    }
-
-    .formas-pagamento input[type="radio"]:checked {
-      background-color: #d9155c;
-      border-color: #d9155c;
-      box-shadow: 0 0 0 3px rgba(233,158,185,0.3);
-    }
-
-    .formas-pagamento label:hover {
-      background: #ffe6f0;
-      border-color: #d9155c;
-      transform: scale(1.04);
-    }
-
-    /* ================= BOTÃO FINALIZAR ================= */
-    .btn-finalizar {
-      display: block;
-      margin: 35px auto 0 auto;
-      background: linear-gradient(135deg, #d9155c, #f48bae);
-      color: #fff;
-      border: none;
-      border-radius: 35px;
-      padding: 12px 35px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s ease;
-      box-shadow: 0 4px 10px rgba(233,158,185,0.3);
-    }
-
-    .btn-finalizar:hover {
-      background: linear-gradient(135deg, #f48bae, #ffe6f0);
-      color: #700a32;
-      transform: scale(1.05);
-    }
-  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
@@ -206,7 +14,7 @@
 
       <form action="/loja/checkout/finalizar" method="POST">
         <% if (carrinho && carrinho.length > 0) { %>
-          <table class="produtos-lista">
+          <table class="tabela-padrao">
             <thead>
               <tr>
                 <th>Produto</th>
@@ -218,12 +26,24 @@
                 <tr>
                   <td>
                     <div class="produto-info">
-                      <img src="<%= item.imagem %>" alt="<%= item.nome %>" />
+                      <% 
+                        let imgPath;
+                        if (item.imagem) {
+                          const im = String(item.imagem);
+                          if (/^https?:\/\//i.test(im)) imgPath = im;
+                          else if (im.startsWith('/')) imgPath = im;
+                          else if (im.startsWith('uploads/')) imgPath = '/' + im;
+                          else imgPath = '/uploads/' + im;
+                        } else {
+                          imgPath = '/imagens/image.png';
+                        }
+                      %>
+                      <img src="<%= imgPath %>" alt="<%= item.nome %>" />
                       <span><%= item.nome %></span>
                     </div>
                   </td>
                   <td class="preco">
-                    R$ <%= item.preco && !isNaN(item.preco) ? Number(item.preco).toFixed(2) : "0.00" %>
+                    R$ <%= item.preco_unitario && !isNaN(item.preco_unitario) ? Number(item.preco_unitario).toFixed(2) : "0.00" %>
                   </td>
                 </tr>
               <% }) %>

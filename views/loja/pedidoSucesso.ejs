@@ -4,59 +4,13 @@
   <meta charset="UTF-8">
   <title>Pedido Finalizado</title>
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    .sucesso-container {
-      max-width: 700px;
-      margin: 80px auto;
-      background: #fff0f6;
-      padding: 50px;
-      border-radius: 25px;
-      box-shadow: 0 8px 25px rgba(233,158,185,0.5);
-      text-align: center;
-    }
-
-    h1 {
-      color: #d9155c;
-      font-size: 32px;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-    p {
-      font-size: 18px;
-      color: #700a32;
-      margin-bottom: 30px;
-    }
-
-    .btn-voltar-loja {
-      display: inline-block;
-      background: linear-gradient(135deg, #d9155c, #f48bae);
-      color: #fff;
-      border-radius: 25px;
-      padding: 12px 30px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: 0.3s ease;
-    }
-
-    .btn-voltar-loja:hover {
-      background: linear-gradient(135deg, #f48bae, #ffe6f0);
-      color: #700a32;
-    }
-
-    .icone-sucesso {
-      font-size: 60px;
-      color: #d9155c;
-      margin-bottom: 20px;
-    }
-  </style>
 </head>
 <body>
   <%- include('../partials/header') %>
 
   <main>
     <section class="sucesso-container">
-      <div class="icone-sucesso">✔️</div>
+      <div class="icone-sucesso">✅</div>
       <h1>Pedido Finalizado com Sucesso!</h1>
       <p>Obrigado por comprar na nossa loja, <strong><%= usuario.nome %></strong>.<br>
       Seu pedido foi registrado e está sendo processado.</p>
